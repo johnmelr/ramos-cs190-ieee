@@ -1,0 +1,164 @@
+\documentclass[journal]{./IEEE/IEEEtran}
+\usepackage{cite,graphicx}
+\usepackage{url}
+
+\newcommand{\SPTITLE}{SMS client with end-to-end encryption}
+\newcommand{\ADVISEE}{John Mel R. Ramos}
+\newcommand{\ADVISER}{Jaderick P. Pabico}
+
+\newcommand{\BSCS}{Bachelor of Science in Computer Science}
+\newcommand{\ICS}{Institute of Computer Science}
+\newcommand{\UPLB}{University of the Philippines Los Ba\~{n}os}
+\newcommand{\REMARK}{\thanks{Presented to the Faculty of the \ICS, \UPLB\
+		in partial fulfillment of the requirements
+		for the Degree of \BSCS}}
+\markboth{CMSC 190 Special Problem, \ICS}{}
+\title{\SPTITLE}
+\author{\ADVISEE~and~\ADVISER%
+	\REMARK
+}
+\pubid{\copyright~2006~ICS \UPLB}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+	
+% TITLE
+\maketitle
+	
+% ABSTRACT
+%\begin{abstract}
+%The quick brown fox jumps over the lazy dog near the riverbank.
+%\end{abstract}
+
+% INDEX TERMS
+%\begin{keywords}
+%SMS, end-to-end encryption
+%\end{keywords}
+
+% OUTLINE:
+% Brief history of SMS including its use cases in the current era of mobile communications
+% Why is securing SMS important
+% Why SMS is still relevant today.
+% Explain the scope and limitations of the proposed client.
+% Literature Review
+% Methodology
+
+% INTRODUCTION
+\section{Introduction}
+%1. Why is the problem of interest? 1-2 pars
+Despite the emergence of instant messaging (IM) and Over-the-top (OTT) 
+messaging applications, short message service (SMS) remains as a popular option 
+for mobile communication. With the first text message sent in 1992 through the 
+Global System for Mobile communication (GSM) network, the technology has seen 
+a lot of growth and  development~\cite{LeBodic_2005}. While mostly used for 
+person-to-person communication \cite{Herring_Stein_Virtanen_2013}, the medium 
+has seen other applications such as alert notification~\cite{Yoo_Lee_Yoo_Xiao_2021,
+Azid_Sharma_Raghuwaiya_Chand_Prasad_Jacquier_2015}, 
+empowering businesses and online services~\cite{Gargaro_2023, Okazaki_Taylor_2008, 
+SecureSMS14}, mobile health (m-health) interventions~\cite{NudgeFlu23, SMSUx22}, 
+mobile government applications~\cite{Onashoga_Ogunjobi_Ibharalu_Lawal_2016, EGov13},
+education~\cite{Hill_Hill_Sherman_2007}, Two-Factor Authentication (2FA)
+~\cite{DynamicOTP} and more. During the year 2022, Globe Telecom gained 
+Php 8.8 billion revenue from SMS with 86.7 million mobile customers. 
+Furthermore, the company has invested Php 1.1 billion to improve spam and 
+fraudulent SMS detection and prevention~\cite{GlobeIR22}. Unreliable internet 
+service as well as the lack of Internet infrastructure in some area remains a 
+challenge in the adoption of online services for communication such as 
+Facebook Messenger, Viber, Telegram, etc. SMS on the other hand is ubiquitous. 
+Anyone with a mobile device and a registered subscriber identity module (SIM) 
+card can send and receive text messages regardless of their platform and 
+cellular provider~\cite{PhilStar}. 
+
+Regardless of its wide range of applications and sustained use, however, 
+SMS is not ideal for private communication such as sending sensitive and 
+confidential information as early specifications for SMS does not have security 
+in mind~\cite{3gpp2}. The European Telecommunications Standards Institute (ETSI) 
+specified the use of A5 algorithm for encryption over the GSM network together 
+with the A3 and A8 algorithm for authentication and cipher key generation to 
+provide security~\cite{Schiller2011} but attacks on the A5/1 and the weaker 
+A5/2 algorithms has been demonstrated even with minimal resources
+~\cite{a512001, a522007,Barkan_Biham_Keller_2003} and even the A5/3 used for 
+Third Generation (3G) network has been compromised~\cite{a532010}. 
+Mobile network operators may also opt not to use any encryption during the 
+transit of message wirelessly~\cite{gsm348}. This means that a 
+Man-in-the-Middle (MITM) can sit between the Mobile Equipment (ME) and 
+Base Station Subsystem (BSS) using an International Mobile Subscriber Identity 
+(IMSI) catcher to actively intercept traffic and even request the victim ME 
+to use a weaker or no encryption at all~\cite{Cattaneo_DeMaio_Faruolo_Petrillo_2013}. 
+Additionally, encryption are only performed between the Mobile Equipment (ME) 
+and the Base Station Subsystem (BSS)~\cite{Schiller2011}. Once the message 
+reaches the SMS Center (SMSC), messages are stored and kept in plain text for a 
+while allowing malicious entities to target the SMSC to 
+view the contents of these messages. This makes an end-to-end encryption a huge
+improvement over what is available in the GSM specifications.
+
+%2. What is the background of the solutions proposed by others? (summary of literature review, 1 par)
+To provide a better security system for SMS, independent researchers have
+proposed frameworks and protocols that offers end-to-end encryption.
+PK-SIM~\cite{PKSIMcard07} provides end-to-end security between the mobile user 
+and service provider through Public Key Infrastructure (PKI).
+SMSSec~\cite{SMSSec08} was developed using the Java Wireless Messaging API (WAP)
+and uses a combination of asymmetric and symmetric cryptography to provide
+security. EasySMS~\cite{EasySMS14} and SecureSMS~\cite{SecureSMS14} are
+completely based on symmetric key cryptography. Similarly, SmartSMS
+~\cite{SmartSMS16} uses symmetric key encryption for m-health application.
+These protocols however, requires additional resources and infrastructure
+on the side of the service provider in order to be implemented.
+
+%3. What is the background of my proposed solution? (rev of my solution), 1 par
+In this paper, the researcher proposes an SMS client that uses 
+quick-response (QR) codes for key exchange. Initially developed by Toyota's
+subsidiary Denso Wave for inventory of vehicle parts manufacturing,
+QR code has seen many application in today's era~\cite{Tiwari_2016}.
+ 
+
+
+%4. What will I do? (summary of my methodology), 1-2 par
+%5. What do I expect to happen?
+
+% REVIEW OF RELATED LITERATURE
+\section{Literature Review}
+PK-SIM \cite{PKSIMcard07} card based framework  was proposed to 
+provide end-to-end encryption. 
+Taking advantage of the tamper resistant properties of the Subscriber Identity Module (SIM) card inside  mobile phones to store and protect secrets, the PK-SIM card is a standard SIM equipped with PKI functionality.
+The SMSSec \cite{SMSSec08} protocol uses the Java Wireless Messaging API (WAP) to secure SMS communication.
+It uses asymmetric cryptography once for the first hand-shake to establish a secure channel for communication and a symmetric cryptography on the succeeding exchanges due to its lesser computational cost. In contrast, the EasySMS \cite{EasySMS14} protocol is designed to provide end-to-end encryption using only symmetric algorithm. 
+These protocols rely on an authentication server or a certificate authority to validate the indentities of the involved mobile systems to establish a secure communication channel. 
+Using the same concept from EasySMS, SecureSMS \cite{SecureSMS14} is made for Value Added Services (VAS) applications. Authors found their protocol to be 71\% and 59\% more efficient than the PK-SIM and SMSsec in terms of bandwidth for authentication. 
+SmartSMS \cite{SmartSMS16} protocol is developed for secure m-health environment application. This protocol relies on an authentication server (AS) to generate the shared session key between the sender and receiver and a Trusted Third Party hosted in the cloud to validate the identities of the mobile station.  
+
+% \section{Objectives}
+% 1 General Objective - 1 sentence
+% At least 3 specific objective to support the primary objective
+\section{Objectives}
+
+
+% To DO:
+% Find appropriate algorithm for key exchange, and encryption algorithm than does not excede 160 character per message
+
+% How I would want to conclude:
+% While this approach does not protect against the most common attacks against SMS, through the use of the app, some form of privacy could be had as long as the shared secret remains secured.
+
+% APPENDICES
+%\appendices
+
+%\section{Proof of the First Zonklar Equation}
+%Appendix one text goes here...
+%
+%\section{}
+%Appendix two (without title) text goes here...
+
+% ACKNOWLEDGMENT
+%\section*{Acknowledgment}
+%Many thanks to...
+	
+% BIBLIOGRAPHY
+\bibliographystyle{./IEEE/IEEEtran}
+\bibliography{./ramos-cs190-ieee}
+% \nocite{*}
+
+% BIOGRAPHY
+%\begin{biography}[{\includegraphics{./yourPicture.eps}}]{Student M. Name}
+%Biography text here...
+%\end{biography}
+	
+\end{document}
