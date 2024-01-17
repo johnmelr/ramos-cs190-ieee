@@ -2,7 +2,7 @@
 \usepackage{cite,graphicx}
 \usepackage{url}
 
-\newcommand{\SPTITLE}{SMS client with end-to-end encryption}
+\newcommand{\SPTITLE}{QRSMS: SMS client with end-to-end encryption via Quick Response (QR) code}
 \newcommand{\ADVISEE}{John Mel R. Ramos}
 \newcommand{\ADVISER}{Jaderick P. Pabico}
 
@@ -84,7 +84,7 @@ Man-in-the-Middle (MITM) can sit between the Mobile Equipment (ME) and
 Base Station Subsystem (BSS) using an International Mobile Subscriber Identity 
 (IMSI) catcher to actively intercept traffic and even request the victim ME 
 to use a weaker or no encryption at all~\cite{Cattaneo_DeMaio_Faruolo_Petrillo_2013}. 
-Additionally, encryption are only performed between the Mobile Equipment (ME) 
+Additionally, encryption is only performed between the Mobile Equipment (ME) 
 and the Base Station Subsystem (BSS)~\cite{Schiller2011}. Once the message 
 reaches the SMS Center (SMSC), messages are stored and kept in plain text for a 
 while allowing malicious entities to target the SMSC to 
@@ -105,14 +105,33 @@ These protocols however, requires additional resources and infrastructure
 on the side of the service provider in order to be implemented.
 
 %3. What is the background of my proposed solution? (rev of my solution), 1 par
-In this paper, the researcher proposes an SMS client that uses 
+In this paper, we propose an SMS client that uses 
 quick-response (QR) codes for key exchange. Initially developed by Toyota's
 subsidiary Denso Wave for inventory of vehicle parts manufacturing,
 QR code has seen many application in today's era~\cite{Tiwari_2016}.
- 
+Able to store up to a maximum of 7,089 characters in one code~\cite{qrcode}
+it can be used to encode text, URL, and other data and can be decoded using
+a mobile device equipped with a camera and the appropriate software which can
+display a text, connect to a wireless network, open a webpage, or open a linked
+application~\cite{Shin_Jung_Chang_2012}. The proposed client will encode the
+public key and parameters needed to generate a shared secret in a QR code. The
+code can be shared to the intended recipient through offline (in person)
+or other secure online platform that allows sending of images.
 
+End-to-end security will be achieved through the combined use of symmetric and
+asymmetric cryptography as well a key-agreement protocol. Advaned Encryption
+Standard (AES) will be used for encrypting the message as it provides the
+most security while being performant~\cite{Karale_Pendke_Dahiwale_2015}.
+Elliptic Curve Cryptography (ECC) will be used for generating key pairs and
+Elliptic Curve Diffie-Hellman (ECDH) for generating a shared secret. The use
+of ECC allows for a smaller key length while providing an comparable security
+as the Rivest–Shamir–Adleman (RSA) public key cryptosystem~\cite{Amara_Siad_2011}.
 
 %4. What will I do? (summary of my methodology), 1-2 par
+Using the android platform, we will develop an SMS client that can generate
+keypair, exchange public keys through QR code, and establish an end-to-end
+encrypted communication. 
+
 %5. What do I expect to happen?
 
 % REVIEW OF RELATED LITERATURE
@@ -130,7 +149,117 @@ SmartSMS \cite{SmartSMS16} protocol is developed for secure m-health environment
 % 1 General Objective - 1 sentence
 % At least 3 specific objective to support the primary objective
 \section{Objectives}
+% In this section you state what you want to accomplish. First state the 
+% general objective then the specific objectives. Your results after the 
+% implementation should achieve the objectives you stated.
+To provide a secure platform for the exchange of encrypted SMS, the main
+objective of this research is to develop an SMS client application that
+can encrypt and decrypt messages and utilize QR codes as means of
+exchanging keys for generating a shared secret. To be specific, this research
+aims to do the following:
+\begin{itemize}
+    \item[1.] Implement a keypair generator and encode the public key on a
+        QR code.
+    \item[2.] Implement a decoder to retrieve the keys in the QR code and
+        generate a shared secret using a key-agreement protocol.
+    \item[3.] Implement an SMS client with cryptographic capabilities
+        using the android system's built in libraries.
+\end{itemize}
 
+
+% The Methodology section should describe the approach you are going to 
+% take to solve the problem. You can use the software development lifecycle 
+% as an outline: Requirements, Design, Implementation, and Testing.
+% A timeline is also required in this section. You can use a Gantt chart 
+% for this at least at the week level granularity. At the proposal stage, 
+% you should write the methodology in future tense.
+\section{Materials and Methods}
+Equipped with features and support for developing android applications,
+Android Studio will be used as the integrated development environment (IDE).
+The programming language Kotlin will also be used for the application as it
+eliminates the verbosity of Java while also allowing the use of Java libraries
+~\cite{Moskala_Wojda_2017}. The android platform comes with telephony and 
+cryptographic libraries that will help achieve the goals of the 
+application~\cite{android_pkg}.
+
+\subsection{Requirements}
+In order to achieve the main purpose of this application, the following
+requirements must be considered. The application should be able to:
+\begin{itemize}
+    \item[1.] Send and receive encrypted SMS message.
+    \item[2.] Decrypt encrypted SMS message.
+    \item[3.] Generate a private and public key pair.
+    \item[4.] Encode the user's public key along with other parameters
+        needed to perform a key exchange into a QR code.
+    \item[5.] Decode the QR code containing the other participant's public
+        key and parameters to generate the shared secret.
+    \item[6.] Safely store secrets inside the device.
+    \item[7.] Associate the correct keys to the appropriate contact.
+    \item[8.] Allow users to manage saved keys.
+\end{itemize}
+
+It should also be noted that in order to keep the integrity of the system,
+we have to make the assumption that the user will not feed a QR code
+whose origin is unknown. To ensure that the code being decoded is from the 
+intended contact, it goes without saying that the QR code should only come
+from the other party involved in the secure communication. 
+While there will be verification if the encoded data
+are valid, this assumption will help protect the user against adversaries.
+
+\subsection{System Design}
+To achieve end-to-end encryption, the application can be broken into three
+major steps --- keypair generation, key-agreement protocol, and
+encrypted messaging.
+\begin{figure*}
+    \centering
+    \includegraphics[width=6in]{images/key_agreement.eps}
+    \caption{Overview of key generation and key agreement in QRSMS}
+    \label{key_genagree}
+\end{figure*}
+
+\subsubsection{Keypair Generation}
+Before enabling the exchange of encrypted messages, each party involved
+must first generated their public and private key pair. For each contact the
+user wants to exchange keys with, a unique key pair will be generated.
+We will be using Elliptic Curve (EC) algorithm for the generation.
+The generated public key will be encoded to a QR code while the complementing
+private key will be kept securely in the system and will be used to finalize
+the key exchange.
+
+\subsubsection{Key-Agreement Protocol}
+Once each party have their generated QR code, they will give their QR code to
+the other allowing them to scan and use the key. Using ECDH, their private key
+for that particular user will be fed along with the scanned public key to
+generate a shared secret. The shared secret will be stored inside Android's
+built in KeyStore to protect the keys from unauthorized use~\cite{android_keystore}.
+
+\begin{figure*}
+    \centering
+    \includegraphics[width=6in]{images/encrypted_messaging.eps}
+    \caption{Overview of sending and decryption of messages in
+    QRSMS}
+    \label{encrypted}
+\end{figure*}
+
+\subsubsection{Encrypted Messaging}
+With each of the user involved in the key-agreement now having generated a
+shared secret with their intended contact, the exchange of encrypted SMS
+can now begin. Using AES encryption, we can generate an encrypted ciphertext
+with the shared secret as the key for symmetric cryptography. 
+
+Fig.~\ref{key_genagree} and fig.~\ref{encrypted} shows an overview of how 
+the system will work. While each of the individual step can be implemented 
+individually, the order of their execution is important as the input for the 
+succeeding step relies on the previous. 
+
+The javax.crypto library contains the KeyAgreement class needed to
+establish a shared secret as well as the Cipher class that contains the 
+functionalities for symmetric encryption. The java.security library will
+enable us to use the KeyGenerator class which allows the generation of
+public and private key pair using EC. On the other hand, there is no built-in
+libraries for encoding and decoding of QR code. For that, zxing~\cite{zxing}
+and google's ML kit barcode scanning~\cite{mlkit} will be bundled to 
+provide the missing functionalities.
 
 % To DO:
 % Find appropriate algorithm for key exchange, and encryption algorithm than does not excede 160 character per message
