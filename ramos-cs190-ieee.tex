@@ -1,8 +1,9 @@
 \documentclass[journal]{./IEEE/IEEEtran}
 \usepackage{cite,graphicx}
 \usepackage{url}
+\usepackage{listings}
 
-\newcommand{\SPTITLE}{QRSMS: SMS client with end-to-end encryption via Quick Response (QR) code}
+\newcommand{\SPTITLE}{QRSMS: A SMS client with end-to-end encryption via Quick Response (QR) code}
 \newcommand{\ADVISEE}{John Mel R. Ramos}
 \newcommand{\ADVISER}{Jaderick P. Pabico}
 
@@ -20,10 +21,10 @@
 \pubid{\copyright~2006~ICS \UPLB}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{document}
-	
+
 % TITLE
 \maketitle
-	
+
 % ABSTRACT
 %\begin{abstract}
 %The quick brown fox jumps over the lazy dog near the riverbank.
@@ -34,67 +35,57 @@
 %SMS, end-to-end encryption
 %\end{keywords}
 
-% OUTLINE:
-% Brief history of SMS including its use cases in the current era of mobile communications
-% Why is securing SMS important
-% Why SMS is still relevant today.
-% Explain the scope and limitations of the proposed client.
-% Literature Review
-% Methodology
-
 % INTRODUCTION
 \section{Introduction}
-%1. Why is the problem of interest? 1-2 pars
-Despite the emergence of instant messaging (IM) and Over-the-top (OTT) 
-messaging applications, short message service (SMS) remains as a popular option 
-for mobile communication. With the first text message sent in 1992 through the 
-Global System for Mobile communication (GSM) network, the technology has seen 
-a lot of growth and  development~\cite{LeBodic_2005}. While mostly used for 
-person-to-person communication \cite{Herring_Stein_Virtanen_2013}, the medium 
+Despite the emergence of instant messaging (IM) and Over-the-top (OTT)
+messaging applications, short message service (SMS) remains as a popular option
+for mobile communication. With the first text message sent in 1992 through the
+Global System for Mobile communication (GSM) network, the technology has seen
+a lot of growth and  development~\cite{LeBodic_2005}. While mostly used for
+person-to-person communication \cite{Herring_Stein_Virtanen_2013}, the medium
 has seen other applications such as alert notification~\cite{Yoo_Lee_Yoo_Xiao_2021,
-Azid_Sharma_Raghuwaiya_Chand_Prasad_Jacquier_2015}, 
-empowering businesses and online services~\cite{Gargaro_2023, Okazaki_Taylor_2008, 
-SecureSMS14}, mobile health (m-health) interventions~\cite{NudgeFlu23, SMSUx22}, 
+	Azid_Sharma_Raghuwaiya_Chand_Prasad_Jacquier_2015},
+empowering businesses and online services~\cite{Gargaro_2023, Okazaki_Taylor_2008,
+	SecureSMS14}, mobile health (m-health) interventions~\cite{NudgeFlu23, SMSUx22},
 mobile government applications~\cite{Onashoga_Ogunjobi_Ibharalu_Lawal_2016, EGov13},
 education~\cite{Hill_Hill_Sherman_2007}, Two-Factor Authentication (2FA)
-~\cite{DynamicOTP} and more. During the year 2022, Globe Telecom gained 
-Php 8.8 billion revenue from SMS with 86.7 million mobile customers. 
-Furthermore, the company has invested Php 1.1 billion to improve spam and 
-fraudulent SMS detection and prevention~\cite{GlobeIR22}. Unreliable internet 
-service as well as the lack of Internet infrastructure in some area remains a 
-challenge in the adoption of online services for communication such as 
-Facebook Messenger, Viber, Telegram, etc. SMS on the other hand is ubiquitous. 
-Anyone with a mobile device and a registered subscriber identity module (SIM) 
-card can send and receive text messages regardless of their platform and 
-cellular provider~\cite{PhilStar}. 
+~\cite{DynamicOTP} and more. During the year 2022, Globe Telecom gained
+Php 8.8 billion revenue from SMS with 86.7 million mobile customers.
+Furthermore, the company has invested Php 1.1 billion to improve spam and
+fraudulent SMS detection and prevention~\cite{GlobeIR22}. Unreliable internet
+service as well as the lack of Internet infrastructure in some area remains a
+challenge in the adoption of online services for communication such as
+Facebook Messenger, Viber, Telegram, etc. SMS on the other hand is ubiquitous.
+Anyone with a mobile device and a registered subscriber identity module (SIM)
+card can send and receive text messages regardless of their platform and
+cellular provider~\cite{PhilStar}.
 
-Regardless of its wide range of applications and sustained use, however, 
-SMS is not ideal for private communication such as sending sensitive and 
-confidential information as early specifications for SMS does not have security 
-in mind~\cite{3gpp2}. The European Telecommunications Standards Institute (ETSI) 
-specified the use of A5 algorithm for encryption over the GSM network together 
-with the A3 and A8 algorithm for authentication and cipher key generation to 
-provide security~\cite{Schiller2011} but attacks on the A5/1 and the weaker 
+Regardless of its wide range of applications and sustained use, however,
+SMS is not ideal for private communication such as sending sensitive and
+confidential information as early specifications for SMS does not have security
+in mind~\cite{3gpp2}. The European Telecommunications Standards Institute (ETSI)
+specified the use of A5 algorithm for encryption over the GSM network together
+with the A3 and A8 algorithm for authentication and cipher key generation to
+provide security~\cite{Schiller2011} but attacks on the A5/1 and the weaker
 A5/2 algorithms has been demonstrated even with minimal resources
-~\cite{a512001, a522007,Barkan_Biham_Keller_2003} and even the A5/3 used for 
-Third Generation (3G) network has been compromised~\cite{a532010}. 
-Mobile network operators may also opt not to use any encryption during the 
-transit of message wirelessly~\cite{gsm348}. This means that a 
-Man-in-the-Middle (MITM) can sit between the Mobile Equipment (ME) and 
-Base Station Subsystem (BSS) using an International Mobile Subscriber Identity 
-(IMSI) catcher to actively intercept traffic and even request the victim ME 
-to use a weaker or no encryption at all~\cite{Cattaneo_DeMaio_Faruolo_Petrillo_2013}. 
-Additionally, encryption is only performed between the Mobile Equipment (ME) 
-and the Base Station Subsystem (BSS)~\cite{Schiller2011}. Once the message 
-reaches the SMS Center (SMSC), messages are stored and kept in plain text for a 
-while allowing malicious entities to target the SMSC to 
+~\cite{a512001, a522007,Barkan_Biham_Keller_2003} and even the A5/3 used for
+Third Generation (3G) network has been compromised~\cite{a532010}.
+Mobile network operators may also opt not to use any encryption during the
+transit of message wirelessly~\cite{gsm348}. This means that a
+Man-in-the-Middle (MITM) can sit between the Mobile Equipment (ME) and
+Base Station Subsystem (BSS) using an International Mobile Subscriber Identity
+(IMSI) catcher to actively intercept traffic and even request the victim ME
+to use a weaker or no encryption at all~\cite{Cattaneo_DeMaio_Faruolo_Petrillo_2013}.
+Additionally, encryption is only performed between the Mobile Equipment (ME)
+and the Base Station Subsystem (BSS)~\cite{Schiller2011}. Once the message
+reaches the SMS Center (SMSC), messages are stored and kept in plain text for a
+while allowing malicious entities to target the SMSC to
 view the contents of these messages. This makes an end-to-end encryption a huge
 improvement over what is available in the GSM specifications.
 
-%2. What is the background of the solutions proposed by others? (summary of literature review, 1 par)
 To provide a better security system for SMS, independent researchers have
 proposed frameworks and protocols that offers end-to-end encryption.
-PK-SIM~\cite{PKSIMcard07} provides end-to-end security between the mobile user 
+PK-SIM~\cite{PKSIMcard07} provides end-to-end security between the mobile user
 and service provider through Public Key Infrastructure (PKI).
 SMSSec~\cite{SMSSec08} was developed using the Java Wireless Messaging API (WAP)
 and uses a combination of asymmetric and symmetric cryptography to provide
@@ -104,8 +95,7 @@ completely based on symmetric key cryptography. Similarly, SmartSMS
 These protocols however, requires additional resources and infrastructure
 on the side of the service provider in order to be implemented.
 
-%3. What is the background of my proposed solution? (rev of my solution), 1 par
-In this paper, we propose an SMS client that uses 
+This paper propose an SMS client that uses
 quick-response (QR) codes for key exchange. Initially developed by Toyota's
 subsidiary Denso Wave for inventory of vehicle parts manufacturing,
 QR code has seen many application in today's era~\cite{Tiwari_2016}.
@@ -125,103 +115,159 @@ most security while being performant~\cite{Karale_Pendke_Dahiwale_2015}.
 Elliptic Curve Cryptography (ECC) will be used for generating key pairs and
 Elliptic Curve Diffie-Hellman (ECDH) for generating a shared secret. The use
 of ECC allows for a smaller key length while providing an comparable security
-as the Rivest–Shamir–Adleman (RSA) public key cryptosystem~\cite{Amara_Siad_2011}.
+as the Rivest–Shamir–Adleman (RSA) public key cryptosystem
+~\cite{Amara_Siad_2011}.
 
-%4. What will I do? (summary of my methodology), 1-2 par
-Using the android platform, we will develop an SMS client that can generate
-keypair, exchange public keys through QR code, and establish an end-to-end
-encrypted communication. 
-
-%5. What do I expect to happen?
+The proposed method will use the android platform to  develop an SMS client
+that can generate keypair, exchange public keys through QR code, and establish
+an end-to-end encrypted communication.
 
 % REVIEW OF RELATED LITERATURE
 \section{Literature Review}
-PK-SIM \cite{PKSIMcard07} card based framework  was proposed to 
-provide end-to-end encryption. 
-Taking advantage of the tamper resistant properties of the Subscriber Identity Module (SIM) card inside  mobile phones to store and protect secrets, the PK-SIM card is a standard SIM equipped with PKI functionality.
-The SMSSec \cite{SMSSec08} protocol uses the Java Wireless Messaging API (WAP) to secure SMS communication.
-It uses asymmetric cryptography once for the first hand-shake to establish a secure channel for communication and a symmetric cryptography on the succeeding exchanges due to its lesser computational cost. In contrast, the EasySMS \cite{EasySMS14} protocol is designed to provide end-to-end encryption using only symmetric algorithm. 
-These protocols rely on an authentication server or a certificate authority to validate the indentities of the involved mobile systems to establish a secure communication channel. 
-Using the same concept from EasySMS, SecureSMS \cite{SecureSMS14} is made for Value Added Services (VAS) applications. Authors found their protocol to be 71\% and 59\% more efficient than the PK-SIM and SMSsec in terms of bandwidth for authentication. 
-SmartSMS \cite{SmartSMS16} protocol is developed for secure m-health environment application. This protocol relies on an authentication server (AS) to generate the shared session key between the sender and receiver and a Trusted Third Party hosted in the cloud to validate the identities of the mobile station.  
+Regardless of the insecurity present in SMS, due to its wide spread
+application, it remains to be of use to many users around the world.
+To provide better end-to-end security, protocols/frameworks has been proposed.
 
-% \section{Objectives}
-% 1 General Objective - 1 sentence
-% At least 3 specific objective to support the primary objective
+PK-SIM \cite{PKSIMcard07} card is a framework developed based on Public Key
+Infrastructure (PKI) providing end-to-end encryption between the Service
+Provider (SP) and the mobile user which contains the PK-SIM card. Their
+framework is composed of the mobile client, a Certification Authority and
+Registration Authority (CA/RA), a Secure Access gateway (SAG) found in the service provider's infrastructure and the Mobile Operator (MO) that
+provides the network for SMS communication. Before the user can send secure
+messages, the SAG together, with the CA/RA must first validate the identity
+of the mobile client. A primary key shared between the client and the SAG is
+generated during the authentication phase. This key is used to establish
+a session key which is used to symmetrically encrypt/decrypt the message.
+However, in their approach, end-to-end security is only available between
+the mobile client and the SAG on the Service Provider's side. Additionally,
+it is stated that the generation of primary key in the authentication phase
+takes up to a day or longer. Every time this key expires, the protocol must
+be performed again from the beginning. Similarly, the SMSSec~\cite{SMSSec08}
+protocol is designed such that it uses a combination of asymmetric
+cryptography for authenticating the user and uses symmetric cryptography
+for the actual exchange of messages. It also falls short such that
+end-to-end encryption is between the mobile device and the authentication
+source. Unlike PK-SIM however, SMSSec is a software solution built with
+the Java Wireless Messaging API (WAP).
+
+In contrast, the EasySMS \cite{EasySMS14} protocol is designed to provide
+end-to-end encryption using only symmetric algorithm. In their approach,
+an Authentication Server (AS) is responsible for the storage of all secret key
+shared between the AS and the respective Mobile Station (MS) or the user.
+It is also assumed that there is a shared secret key between the AS and a
+CA/RA which contains information about every mobile subscriber. Before a SIM
+card could be used, a subscriber must first register within the CA/RA. With
+these requirements met, the AS, with the help of CA/RA can now authenticate
+any MS that wants to send an SMS securely. However, this approach falls under
+the same disadvantage as the previous protocols. When user A wants to send a message to user B, the AS validates the identity of both users and generate
+different key for each respective user. This means that the message from
+user A is encrypted with the key shared between the AS and user A, decrypted
+in the AS then re-encrypt the message for user B using the key shared between
+the AS and user B. This approach is also used for the development of
+SecueSMS~\cite{SecureSMS14} but is proposed to be specific for value added
+services (VAS) and commercial applications. SmartSMS~\cite{SmartSMS16} follows
+a similar concept but instead of the AS being connected to a CA/RA, a
+trusted third party hosted in a public cloud is responsible for the
+functions of CA/RA.
+
+In these protocol, apart from being not truly end-to-end encrypted (encryption
+only occurs between the mobile station and the service provider), they also
+require a third party for authenticating the user. This means that in order to
+achieve secure communication, changes within the service provider's and the
+network itself must be consider. This paper will introduce a
+different approach that does not require additional infrastructure by
+having the ciphertext sent through the SMS network while encryption and
+decryption is performed by the communicating devices.
+
 \section{Objectives}
-% In this section you state what you want to accomplish. First state the 
-% general objective then the specific objectives. Your results after the 
-% implementation should achieve the objectives you stated.
-To provide a secure platform for the exchange of encrypted SMS, the main
+To create a secure platform for the exchange of encrypted SMS, the main
 objective of this research is to develop an SMS client application that
 can encrypt and decrypt messages and utilize QR codes as means of
 exchanging keys for generating a shared secret. To be specific, this research
 aims to do the following:
 \begin{itemize}
-    \item[1.] Implement a keypair generator and encode the public key on a
-        QR code.
-    \item[2.] Implement a decoder to retrieve the keys in the QR code and
-        generate a shared secret using a key-agreement protocol.
-    \item[3.] Implement an SMS client with cryptographic capabilities
-        using the android system's built in libraries.
+	\item[1.] Implement a keypair generator and encode the public key on a
+		QR code.
+	\item[2.] Implement a decoder to retrieve the keys in the QR code and
+		generate a shared secret using a key-agreement protocol.
+	\item[3.] Implement an SMS client with cryptographic capabilities
+		using the android system's built in libraries.
+	\item[4.] Evaluate the usability of a user initiated security system
+		via QR code.
 \end{itemize}
 
+\begin{figure*}
+	\centering
+	\includegraphics[width=6in]{images/key_agreement.eps}
+	\caption{Overview of key generation and key agreement in QRSMS}
+	\label{key_genagree}
+\end{figure*}
 
-% The Methodology section should describe the approach you are going to 
-% take to solve the problem. You can use the software development lifecycle 
-% as an outline: Requirements, Design, Implementation, and Testing.
-% A timeline is also required in this section. You can use a Gantt chart 
-% for this at least at the week level granularity. At the proposal stage, 
-% you should write the methodology in future tense.
+\begin{figure*}
+	\centering
+	\includegraphics[width=6in]{images/encrypted_messaging.eps}
+	\caption{Overview of sending and decryption of messages in
+		QRSMS}
+	\label{encrypted}
+\end{figure*}
+
 \section{Materials and Methods}
 Equipped with features and support for developing android applications,
 Android Studio will be used as the integrated development environment (IDE).
 The programming language Kotlin will also be used for the application as it
-eliminates the verbosity of Java while also allowing the use of Java libraries
-~\cite{Moskala_Wojda_2017}. The android platform comes with telephony and 
-cryptographic libraries that will help achieve the goals of the 
+fully supported for android development as well as it eliminates the verbosity
+of Java while also allowing the use of Java libraries
+~\cite{Moskala_Wojda_2017}. The android platform comes with telephony and
+cryptographic libraries that will help achieve the goals of the
 application~\cite{android_pkg}.
 
+
 \subsection{Requirements}
-In order to achieve the main purpose of this application, the following
-requirements must be considered. The application should be able to:
+To achieve end-to-end encryption, both the sending and receiving party must
+have the application installed and have exchanged their QR code generated by
+the application through other means suggested below. In case only one party
+has the software installed, if they decide to send an encrypted message to
+a user without the application, the latter might receive the message in
+ciphertext. If the opposite were to occur, the application should be able to
+determine if the received text was encrypted or not. In general, for the
+software to perform its intended function, the following requirements must
+be considered. The application should be able to:
 \begin{itemize}
-    \item[1.] Send and receive encrypted SMS message.
-    \item[2.] Decrypt encrypted SMS message.
-    \item[3.] Generate a private and public key pair.
-    \item[4.] Encode the user's public key along with other parameters
-        needed to perform a key exchange into a QR code.
-    \item[5.] Decode the QR code containing the other participant's public
-        key and parameters to generate the shared secret.
-    \item[6.] Safely store secrets inside the device.
-    \item[7.] Associate the correct keys to the appropriate contact.
-    \item[8.] Allow users to manage saved keys.
+	\item[1.] Send and receive encrypted SMS message.
+	\item[2.] Decrypt encrypted SMS message.
+	\item[3.] Generate a private and public key pair.
+	\item[4.] Encode the user's public key along with other parameters
+		needed to perform a key exchange into a QR code.
+	\item[5.] Decode the QR code containing the other participant's public
+		key and parameters to generate the shared secret.
+	\item[6.] Safely store secrets inside the device.
+	\item[7.] Associate the correct keys to the appropriate contact.
+	\item[8.] Allow users to manage saved keys.
 \end{itemize}
 
-It should also be noted that in order to keep the integrity of the system,
-we have to make the assumption that the user will not feed a QR code
-whose origin is unknown. To ensure that the code being decoded is from the 
-intended contact, it goes without saying that the QR code should only come
-from the other party involved in the secure communication. 
-While there will be verification if the encoded data
-are valid, this assumption will help protect the user against adversaries.
+It should be noted that in order to keep the integrity of the system,
+an assumption is made that the user will not feed a QR code
+whose origin is unknown. To ensure that the code being decoded is from the
+intended contact, the QR code should only come from the other party involved
+in the secure communication through other means such as offline
+(in-person exchange) or secure online application. That said, the method in
+which the QR codes are exchange between users will not be included in the
+analysis of the security of the application. This eliminates the need
+for authentication methods as the users themselves are the one responsible
+for ensuring that the participant in the exchange is the intended receipient.
+This assumption sets the scope of the study such that the the paper will focus
+on investigating the usability of QR code in encrypting SMS messages.
 
 \subsection{System Design}
 To achieve end-to-end encryption, the application can be broken into three
 major steps --- keypair generation, key-agreement protocol, and
 encrypted messaging.
-\begin{figure*}
-    \centering
-    \includegraphics[width=6in]{images/key_agreement.eps}
-    \caption{Overview of key generation and key agreement in QRSMS}
-    \label{key_genagree}
-\end{figure*}
 
 \subsubsection{Keypair Generation}
 Before enabling the exchange of encrypted messages, each party involved
 must first generated their public and private key pair. For each contact the
-user wants to exchange keys with, a unique key pair will be generated.
-We will be using Elliptic Curve (EC) algorithm for the generation.
+user wants to exchange keys with, a unique key pair will be generated
+using Elliptic Curve (EC) algorithm.
 The generated public key will be encoded to a QR code while the complementing
 private key will be kept securely in the system and will be used to finalize
 the key exchange.
@@ -230,42 +276,71 @@ the key exchange.
 Once each party have their generated QR code, they will give their QR code to
 the other allowing them to scan and use the key. Using ECDH, their private key
 for that particular user will be fed along with the scanned public key to
-generate a shared secret. The shared secret will be stored inside Android's
-built in KeyStore to protect the keys from unauthorized use~\cite{android_keystore}.
-
-\begin{figure*}
-    \centering
-    \includegraphics[width=6in]{images/encrypted_messaging.eps}
-    \caption{Overview of sending and decryption of messages in
-    QRSMS}
-    \label{encrypted}
-\end{figure*}
+generate a shared secret. This process is illustrated in fig.~\ref{key_genagree}.
+The shared secret will be stored inside Android's built in KeyStore to protect
+the keys from unauthorized use~\cite{android_keystore}.
 
 \subsubsection{Encrypted Messaging}
 With each of the user involved in the key-agreement now having generated a
 shared secret with their intended contact, the exchange of encrypted SMS
-can now begin. Using AES encryption, we can generate an encrypted ciphertext
-with the shared secret as the key for symmetric cryptography. 
+can now begin. AES encryption algorithm can be used generate the ciphertext
+with the shared secret as the key for symmetric cryptography shown in
+fig.~\ref{encrypted}.
 
-Fig.~\ref{key_genagree} and fig.~\ref{encrypted} shows an overview of how 
-the system will work. While each of the individual step can be implemented 
-individually, the order of their execution is important as the input for the 
-succeeding step relies on the previous. 
-
-The javax.crypto library contains the KeyAgreement class needed to
-establish a shared secret as well as the Cipher class that contains the 
-functionalities for symmetric encryption. The java.security library will
-enable us to use the KeyGenerator class which allows the generation of
+The \lstinline{javax.crypto} library contains the KeyAgreement class needed to
+establish a shared secret as well as the Cipher class that contains the
+functionalities for symmetric encryption. The \lstinline{java.security} library
+will enable us to use the KeyGenerator class which allows the generation of
 public and private key pair using EC. On the other hand, there is no built-in
-libraries for encoding and decoding of QR code. For that, zxing~\cite{zxing}
-and google's ML kit barcode scanning~\cite{mlkit} will be bundled to 
-provide the missing functionalities.
+libraries for encoding and decoding of QR code. For that, ZXing~\cite{zxing}
+and Google's ML kit barcode scanning~\cite{mlkit} will be bundled with the
+application to provide the missing functionalities.
 
-% To DO:
-% Find appropriate algorithm for key exchange, and encryption algorithm than does not excede 160 character per message
+\subsection{User Testing}
+Throughout the duration of the development process, the features and interface
+of the system will be thoroughly tested to ensure that the program can perform
+its intended functions. However, upon the completion of a minimum viable
+product, usability test will be conducted to further inspect the working
+condition off the application as well as analyze users' thoughts with regards
+to the system. Users will be asked to perform various tasks that involves the
+following capabilities of the application:
 
-% How I would want to conclude:
-% While this approach does not protect against the most common attacks against SMS, through the use of the app, some form of privacy could be had as long as the shared secret remains secured.
+\begin{figure}
+	\centering
+	\includegraphics[height=5in]{./images/QRSMS_main_prototype.png}
+	\caption{QRSMS User Interface Prototype}
+	\label{QRSMSUI}
+\end{figure}
+
+\begin{itemize}
+	\item[1.] Generation of QR code containing the public key to be used for
+		a contact
+	\item[2.] Sending and Receiving of unencrypted and encrypted messages
+	\item[3.] Scanning and decoding of QR code received from a contact
+	\item[4.] Manage stored keys
+\end{itemize}
+
+\subsection{Evaluation Technique}
+Along with the given tasks are questionnaire that aims to understand users'
+perspective throughout their usage of the application. Single Ease Question
+(SEQ) will be asked after completing each task. With measures of central
+tendency, a general sentiment can be derived on how well the users performed
+in each of the tasks. This can provide an insight on the ease-of-use of the
+system. This is followed by a System Usability Scale (SUS) Questionnare
+to assess the system's perceived usability.
+
+\section{Expected Outcome}
+Built for the Android Platform, QRSMS should be able to provide
+users the ability exchange end-to-end encrypted SMS to secure their
+conversations using QR code as means to exchange keys.
+Otherwise, the user should be able to send regular SMS if they choose to.
+To ensure smooth operation by the user, the system should be designed
+with a simple and user-friendly interface that user of any background
+can make use of the systems whole functionality. Figure~\ref{QRSMSUI} shows a
+prototype of the User Interface (UI) upon entering the application
+in which most of the significant functions of the system should be present
+and apparent.
+
 
 % APPENDICES
 %\appendices
@@ -279,7 +354,7 @@ provide the missing functionalities.
 % ACKNOWLEDGMENT
 %\section*{Acknowledgment}
 %Many thanks to...
-	
+
 % BIBLIOGRAPHY
 \bibliographystyle{./IEEE/IEEEtran}
 \bibliography{./ramos-cs190-ieee}
@@ -289,5 +364,5 @@ provide the missing functionalities.
 %\begin{biography}[{\includegraphics{./yourPicture.eps}}]{Student M. Name}
 %Biography text here...
 %\end{biography}
-	
+
 \end{document}
