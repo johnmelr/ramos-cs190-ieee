@@ -18,7 +18,7 @@
 \author{\ADVISEE~and~\ADVISER%
 	\REMARK
 }
-\pubid{\copyright~2006~ICS \UPLB}
+%% \pubid{\copyright~2006~ICS \UPLB}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{document}
 
@@ -95,10 +95,10 @@ completely based on symmetric key cryptography. Similarly, SmartSMS
 These protocols however, requires additional resources and infrastructure
 on the side of the service provider in order to be implemented.
 
-This paper propose an SMS client that uses
+This paper proposes an SMS client that uses
 quick-response (QR) codes for key exchange. Initially developed by Toyota's
 subsidiary Denso Wave for inventory of vehicle parts manufacturing,
-QR code has seen many application in today's era~\cite{Tiwari_2016}.
+QR code has seen many applications in today's era~\cite{Tiwari_2016}.
 Able to store up to a maximum of 7,089 characters in one code~\cite{qrcode}
 it can be used to encode text, URL, and other data and can be decoded using
 a mobile device equipped with a camera and the appropriate software which can
@@ -109,26 +109,26 @@ code can be shared to the intended recipient through offline (in person)
 or other secure online platform that allows sending of images.
 
 End-to-end security will be achieved through the combined use of symmetric and
-asymmetric cryptography as well a key-agreement protocol. Advaned Encryption
+asymmetric cryptography as well a key-agreement protocol. Advanced Encryption
 Standard (AES) will be used for encrypting the message as it provides the
 most security while being performant~\cite{Karale_Pendke_Dahiwale_2015}.
 Elliptic Curve Cryptography (ECC) will be used for generating key pairs and
 Elliptic Curve Diffie-Hellman (ECDH) for generating a shared secret. The use
-of ECC allows for a smaller key length while providing an comparable security
+of ECC allows for a smaller key length while providing a comparable security
 as the Rivest–Shamir–Adleman (RSA) public key cryptosystem
 ~\cite{Amara_Siad_2011}.
 
-The proposed method will use the android platform to  develop an SMS client
-that can generate keypair, exchange public keys through QR code, and establish
+The proposed method will use the android platform to develop an SMS client
+that can generate key pair, exchange public keys through QR code, and establish
 an end-to-end encrypted communication.
 
 % REVIEW OF RELATED LITERATURE
 \section{Literature Review}
-Regardless of the insecurity present in SMS, due to its wide spread
+Regardless of the insecurity present in SMS, due to its widespread
 application, it remains to be of use to many users around the world.
 To provide better end-to-end security, protocols/frameworks has been proposed.
 
-PK-SIM \cite{PKSIMcard07} card is a framework developed based on Public Key
+PK-SIM card is a framework developed based on Public Key
 Infrastructure (PKI) providing end-to-end encryption between the Service
 Provider (SP) and the mobile user which contains the PK-SIM card. Their
 framework is composed of the mobile client, a Certification Authority and
@@ -142,15 +142,15 @@ However, in their approach, end-to-end security is only available between
 the mobile client and the SAG on the Service Provider's side. Additionally,
 it is stated that the generation of primary key in the authentication phase
 takes up to a day or longer. Every time this key expires, the protocol must
-be performed again from the beginning. Similarly, the SMSSec~\cite{SMSSec08}
+be performed again from the beginning~\cite{PKSIMcard07}. Similarly, the SMSSec
 protocol is designed such that it uses a combination of asymmetric
 cryptography for authenticating the user and uses symmetric cryptography
 for the actual exchange of messages. It also falls short such that
 end-to-end encryption is between the mobile device and the authentication
 source. Unlike PK-SIM however, SMSSec is a software solution built with
-the Java Wireless Messaging API (WAP).
+the Java Wireless Messaging API (WAP) ~\cite{SMSSec08}.
 
-In contrast, the EasySMS \cite{EasySMS14} protocol is designed to provide
+In contrast, the EasySMS protocol is designed to provide
 end-to-end encryption using only symmetric algorithm. In their approach,
 an Authentication Server (AS) is responsible for the storage of all secret key
 shared between the AS and the respective Mobile Station (MS) or the user.
@@ -163,20 +163,20 @@ the same disadvantage as the previous protocols. When user A wants to send a mes
 different key for each respective user. This means that the message from
 user A is encrypted with the key shared between the AS and user A, decrypted
 in the AS then re-encrypt the message for user B using the key shared between
-the AS and user B. This approach is also used for the development of
-SecueSMS~\cite{SecureSMS14} but is proposed to be specific for value added
-services (VAS) and commercial applications. SmartSMS~\cite{SmartSMS16} follows
+the AS and user B~\cite{EasySMS14}. This approach is also used for the development of
+SecureSMS but is proposed to be specific for value added
+services (VAS) and commercial applications~\cite{SecureSMS14}. SmartSMS follows
 a similar concept but instead of the AS being connected to a CA/RA, a
 trusted third party hosted in a public cloud is responsible for the
-functions of CA/RA.
+functions of CA/RA~\cite{SmartSMS16}.
 
-In these protocol, apart from being not truly end-to-end encrypted (encryption
+In these protocols, apart from being not truly end-to-end encrypted (encryption
 only occurs between the mobile station and the service provider), they also
 require a third party for authenticating the user. This means that in order to
 achieve secure communication, changes within the service provider's and the
-network itself must be consider. This paper will introduce a
+network itself must be considered. This paper will introduce a
 different approach that does not require additional infrastructure by
-having the ciphertext sent through the SMS network while encryption and
+having the cipher text sent through the SMS network while encryption and
 decryption is performed by the communicating devices.
 
 \section{Objectives}
@@ -220,12 +220,12 @@ establish a shared secret while the \lstinline{java.security} library
 will enable us to use the KeyGenerator class which allows the generation of
 public and private key pair using EC. Since there are no built-in libraries
 for encoding and decoding of QR code, ZXing~\cite{zxing} and Google's ML
-kit barcode scanning~\cite{mlkit} will be bundled with the application to
+kit bar code scanning~\cite{mlkit} will be bundled with the application to
 provide the missing functionalities.
 
-\subsubsection{Keypair Generation}
+\subsubsection{Key pair Generation}
 To be able to generate a shared secret with another user, each party involved
-must first generated their public and private key pair. For each contact the
+must first generate their public and private key pair. For each contact the
 user wants to exchange keys with, a unique key pair will be generated
 using Elliptic Curve (EC) algorithm.
 The generated public key will be encoded to a QR code while the complementing
@@ -234,7 +234,7 @@ the key exchange.
 
 \subsubsection{Shared Secret key Generation}
 Once each party have their generated QR code, they will give their QR code to
-the each other and scan the code to retrieve the key. Using ECDH,
+each other and scan the code to retrieve the key. Using ECDH,
 their private key for that particular user will be fed along with the scanned
 public key to generate a shared secret. This process is illustrated in
 fig.~\ref{key_genagree}.
@@ -248,7 +248,7 @@ intended contact, the QR code should only come from the other party involved
 in the secure communication through other means such as offline
 (in-person exchange) or secure online application. This eliminates the need
 for authentication methods as the users themselves are the one responsible
-for ensuring that the participant in the exchange is the intended receipient.
+for ensuring that the participant in the exchange is the intended recipient.
 %% [2.] Design and implement an SMS client for mobile android device  with
 %% 	end-to-end encryption.
 \subsection{Encrypted Messaging}
@@ -256,20 +256,20 @@ To enable end-to-end encryption, both the sending and receiving party must
 have the application installed and have exchanged their QR code generated by
 the application through other means suggested below. In case only one party
 has the software installed, if they decide to send an encrypted message to
-a user without the application, or the receipient have not yet established the
+a user without the application, or the recipient have not yet established the
 shared secret, the latter might receive the message in
-ciphertext, unable to read said text. If the opposite were to occur,
+cipher text, unable to read said text. If the opposite were to occur,
 the application should be able to determine if the received text was encrypted
 or not.
 
 When each of the user involved in the key-agreement now having generated a
 shared secret with their intended contact, the exchange of encrypted SMS
-can now begin. AES encryption algorithm can be used generate the ciphertext
+can now begin. AES encryption algorithm can be used generate the cipher text
 with the shared secret as the key for symmetric cryptography shown in
 fig.~\ref{encrypted}. The android platform comes with the
 \lstinline{android.telephony} package contains the classes needed for sending
 and receiving SMS messages while the \lstinline{javax.crypto} contains
-classes that allows the use ofcryptographic libraries that will help achieve
+classes that allow the use ofcryptographic libraries that will help achieve
 the goals of the application~\cite{android_pkg}.
 
 Equipped with features and support for developing android applications,
@@ -286,8 +286,8 @@ Throughout the duration of the development process, the features and interface
 of the system will be thoroughly tested to ensure that the program can perform
 its intended functions. However, upon the completion of a minimum viable
 product, usability test will be conducted to further inspect the working
-condition off the application as well as analyze users' thoughts with regards
-to the system. Users will be asked to perform various tasks that involves the
+condition off the application as well as analyze users' thoughts with regard to
+to the system. Users will be asked to perform various tasks that involve the
 following capabilities of the application:
 
 \begin{figure}
@@ -311,12 +311,12 @@ perspective throughout their usage of the application. Single Ease Question
 (SEQ) will be asked after completing each task. With measures of central
 tendency, a general sentiment can be derived on how well the users performed
 in each of the tasks. This can provide an insight on the ease-of-use of the
-system. This is followed by a System Usability Scale (SUS) Questionnare
+system. This is followed by a System Usability Scale (SUS) Questionnaire
 to assess the system's perceived usability.
 
 \section{Expected Outcome}
 \subsection{Key-agreement with QR Code}
-Behind the SMS client's ability to conceal the contents of each messages, the
+Behind the SMS client's ability to conceal the contents of each message, the
 key-agreement protocol's function is vital to generate the secret key that
 will be used to encrypt each messages. Figure \ref{generate_view} shows the
 sequence of views that the user can see when they tap the generate QR in the
@@ -343,14 +343,14 @@ vice-versa. Through this exchange, one of the following cases may occur.
 \subsubsection{Case 1: User A and B receives the correct code}
 In this case, when user A generated a QR code they correctly supplied user B's
 phone number and gave them the correct QR code. User B does the same and upon
-scanning each others given code, the key-agreement protocol is done succesfully
+scanning each other's given code, the key-agreement protocol is done successfully
 and came up with the same secret key for both user. Encrypted SMS can now
 occur.
 
 \subsubsection{Case 2: User A or User B or Both receives the wrong code}
 In this case, during generation or sending of QR code, either user A or
 user B selected the incorrect phone number or supplied the incorrect QR code.
-If this happened, the application should throw a user friendly error message
+If this happened, the application should throw a user-friendly error message
 to allow them to troubleshoot the issue and take appropriate action.
 
 \subsection{SMS Client}
@@ -384,7 +384,7 @@ the researchers to recognize the potential of the proposed approach.
 With the way the key-agreement protocol is designed, users might initially
 find this method different from what they are used to. Users has to initiate
 the exchange themselves with the QR code to simplify the act of inputting of
-keys. But an intuitive and well designed interface should be able to guide
+keys. But an intuitive and well-designed interface should be able to guide
 the users to take their intended actions. Because of the popularity of QR code,
 users generally recognizes it and knows how to use it. However, knowing what
 aspect of the system users found the most useful and
