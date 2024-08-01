@@ -1,7 +1,14 @@
 \documentclass[journal]{./IEEE/IEEEtran}
 \usepackage{cite,graphicx}
 \usepackage{url}
+\usepackage{float}
+\usepackage{pdfpages}
 \usepackage{listings}
+\usepackage{multirow}
+\usepackage{multicol}
+\usepackage{array}
+\usepackage[table,xcdraw]{xcolor}
+\usepackage{ragged2e}
 
 \newcommand{\SPTITLE}{QRSMS: A SMS client with end-to-end encryption via Quick Response (QR) code}
 \newcommand{\ADVISEE}{John Mel R. Ramos}
@@ -18,7 +25,7 @@
 \author{\ADVISEE~and~\ADVISER%
 	\REMARK
 }
-%% \pubid{\copyright~2006~ICS \UPLB}
+\pubid{\copyright~2024~ICS \UPLB}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{document}
 
@@ -26,22 +33,25 @@
 \maketitle
 
 % ABSTRACT
-%\begin{abstract}
-%The quick brown fox jumps over the lazy dog near the riverbank.
-%\end{abstract}
+\begin{abstract}
+	Short message service (SMS) remains a popular option for text communication despite the existence of online messaging platforms. Whether because of its convenience, practicality, or accessibility, SMS continues to be a choice for different application. However, securing the SMS network remains a challenge because in its inception, security was not made a priority for its development.
+	This paper introduced a software based approach to solving the lack of end-to-end security for SMS. QRSMS is an android application that enables users to create an end-to-end encrypted channel sent through SMS. End-to-end encryption is enabled through the exchange of QR codes with the contact that they want to establish a secure channel with. Key-agreement is achieved using the Elliptic Curve Diffie-Hellman (ECDH) while key pairs are generated using Elliptic Curve (EC). SMS messages are encrypted using the Advance Encryption Standard (AES) using a key derived from the key-agreement protocol.
+	A usability study was conducted to gather an understanding about the system's usability and ease-of-use. On average, users generally find the system with relative ease to use, however, the mean usability score from the System Usability Scale was average at best. Recommendations for future researches and further improvements are discussed at the end of this paper.
+\end{abstract}
 
 % INDEX TERMS
-%\begin{keywords}
-%SMS, end-to-end encryption
-%\end{keywords}
+\begin{keywords}
+	SMS, end-to-end encryption, QR Code, Android
+\end{keywords}
 
 % INTRODUCTION
-\section{Introduction} Despite the emergence of instant messaging (IM) and Over-the-top (OTT)
+\section{Introduction}
+Despite the emergence of instant messaging (IM) and Over-the-top (OTT)
 messaging applications, short message service (SMS) remains as a popular option
 for mobile communication. With the first text message sent in 1992 through the
 Global System for Mobile communication (GSM) network, the technology has seen
 a lot of growth and  development~\cite{LeBodic_2005}. While mostly used for
-person-to-person communication \cite{Herring_Stein_Virtanen_2013}, the medium
+person-to-person communication~\cite{Herring_Stein_Virtanen_2013}, the medium
 has seen other applications such as alert notification~\cite{Yoo_Lee_Yoo_Xiao_2021,
 	Azid_Sharma_Raghuwaiya_Chand_Prasad_Jacquier_2015},
 empowering businesses and online services~\cite{Gargaro_2023, Okazaki_Taylor_2008,
@@ -94,30 +104,23 @@ completely based on symmetric key cryptography. Similarly, SmartSMS
 These protocols however, requires additional resources and infrastructure
 on the side of the service provider in order to be implemented.
 
-This paper proposes an SMS client that uses
-quick-response (QR) codes for key exchange. Initially developed by Toyota's
-subsidiary Denso Wave for inventory of vehicle parts manufacturing,
-QR code has seen many applications in today's era~\cite{Tiwari_2016}.
-Able to store up to a maximum of 7,089 characters in one code~\cite{qrcode}
-it can be used to encode text, URL, and other data and can be decoded using
-a mobile device equipped with a camera and the appropriate software which can
-display a text, connect to a wireless network, open a webpage, or open a linked
-application~\cite{Shin_Jung_Chang_2012}. The proposed client will encode the
-public key and parameters needed to generate a shared secret in a QR code. The
+This paper proposed an SMS client that uses quick-response (QR) codes for
+key exchange.  This client encodes the phone number
+public key needed to generate a shared secret in a QR code. The generated
 code can be shared to the intended recipient through offline (in person)
-or other secure online platform that allows sending of images.
+or other secure online\newpage\noindent platform that allows sending of images.
 
-End-to-end security will be achieved through the combined use of symmetric and
+End-to-end security is achieved through the combined use of symmetric and
 asymmetric cryptography as well a key-agreement protocol. Advanced Encryption
-Standard (AES) will be used for encrypting the message as it provides the
+Standard (AES) is used for encrypting the message as it provides the
 most security while being performant~\cite{Karale_Pendke_Dahiwale_2015}.
-Elliptic Curve Cryptography (ECC) will be used for generating key pairs and
+Elliptic Curve Cryptography (ECC) is used for generating key pairs and
 Elliptic Curve Diffie-Hellman (ECDH) for generating a shared secret. The use
-of ECC allows for a smaller key length while providing a comparable security
-as the Rivest–Shamir–Adleman (RSA) public key cryptosystem
+of ECC allows for a smaller key length while providing a
+comparable security as the Rivest–Shamir–Adleman (RSA) public key cryptosystem
 ~\cite{Amara_Siad_2011}.
 
-The proposed method will use the android platform to develop an SMS client
+The proposed method used the android platform to develop an SMS client
 that can generate key pair, exchange public keys through QR code, and establish
 an end-to-end encrypted communication.
 
@@ -212,48 +215,73 @@ aims to do the following:
 \subsection{Key-Agreement Protocol}
 To achieve end-to-end security, participants in the exchange should be able to
 generate a shared key known only to them. This process can be further divided
-into two steps. Keypair generation and shared secret key generation. This two
+into two steps. Keypair generation and key-exchange. This two
 step process is shown in Figure \ref{key_genagree}.
-The \lstinline{javax.crypto} library contains the KeyAgreement class needed to
-establish a shared secret while the \lstinline{java.security} library
-will enable us to use the KeyGenerator class which allows the generation of
-public and private key pair using EC. Since there are no built-in libraries
-for encoding and decoding of QR code, ZXing~\cite{zxing} and Google's ML
-kit bar code scanning~\cite{mlkit} will be bundled with the application to
-provide the missing functionalities.
 
 \subsubsection{Key pair Generation}
 To be able to generate a shared secret with another user, each party involved
-must first generate their public and private key pair. For each contact the
-user wants to exchange keys with, a unique key pair will be generated
-using Elliptic Curve (EC) algorithm.
-The generated public key will be encoded to a QR code while the complementing
-private key will be kept securely in the system and will be used to finalize
-the key exchange.
+generates a public and private key pair for the other contact.
+Key pair generation uses the Elliptic Curve (EC) algorithm to create an EC
+key pair under the secp256r1 curve.
+While the key pair generation remains largely the same for any
+device supported by the application, the way it is stored is different
+depending on the android device's API level either in the Android Keystore
+system~\cite{android_keystore} or room database~\cite{room} encrypted using
+SQLCipher for android~\cite{sqlcipher}.
 
-\subsubsection{Shared Secret key Generation}
-Once each party have their generated QR code, they will give their QR code to
-each other and scan the code to retrieve the key. Using ECDH,
-their private key for that particular user will be fed along with the scanned
-public key to generate a shared secret. This process is illustrated in
-fig.~\ref{key_genagree}.
-The shared secret will be stored inside Android's built in KeyStore to protect
-the keys from unauthorized use~\cite{android_keystore}.
+The generated public key, along with the user's phone number is then
+encoded into a QR code using the ZXing ~\cite{zxing} library.
+The complementing private key is kept securely in the
+appropriate storage system to be used for finalizing the key exchange.
 
-It should be noted that in order to keep the integrity of the system,
-an assumption is made that the user will not feed a QR code
-whose origin is unknown. To ensure that the code being decoded is from the
-intended contact, the QR code should only come from the other party involved
-in the secure communication through other means such as offline
-(in-person exchange) or secure online application. This eliminates the need
-for authentication methods as the users themselves are the one responsible
-for ensuring that the participant in the exchange is the intended recipient.
+\subsubsection*{Why QR Codes?}
+Initially developed by Toyota's
+subsidiary Denso Wave for inventory of vehicle parts manufacturing,
+QR code has seen many applications in today's era~\cite{Tiwari_2016}.
+Able to store up to a maximum of 7,089 characters in one code~\cite{qrcode}
+it can be used to encode text, URL, and other data and can be decoded using
+a mobile device equipped with a camera and the appropriate software which can
+display a text, connect to a wireless network, open a webpage, or open a linked
+application~\cite{Shin_Jung_Chang_2012}. Manually inputting the key through an
+input box could introduce human errors whereas encoding data to the QR code
+makes this issue less likely. Additionally, scanning libraries provides
+functionalities that allows application developer to add an action to perform
+after scanning a valid QR code.
+
+\subsubsection{Key Exchange}
+With each party having their QR code for the other, they will exchange
+their QR codes through in-person or online as long as they can verify that
+the QR code belongs to the indicated contact. The given QR code can be
+scanned using the device's camera, decoded by Google's ML kit analyzer~\cite{mlkit}
+with the barcode scanning~\cite{barcode_scanning} api. This QR code should
+contain the contact's phone number and public key string.
+
+After a successful scan, the system looks for a corresponding private key
+associated with the contact. This allows the system to proceed with
+the key exchange using ECDH key agreement protocol and generate a shared
+secret key that should be the same for both users involved. Given user A and
+user B, ECDH is performed by taking the private key of user A
+combining it with the public key of B, and the same is done on the side of user B which generates the same secret key for both users~\cite{IBM_2023}.
+This secret key is then fed into a HMAC-based Extract-and-Expand Key
+Derivation Function (HKDF) to create the final key that will be used for AES encryption and decryption.
+
 %% [2.] Design and implement an SMS client for mobile android device  with
 %% 	end-to-end encryption.
-\subsection{Encrypted Messaging}
-To enable end-to-end encryption, both the sending and receiving party must
+\subsection{SMS Client}
+The SMS client is developed for the Android operating system with a minimum
+API level of 24 with the help of the Android Studio integrated development
+environment (IDE). Written in the Kotlin programming language, this allows
+full compatibility with Java libraries while being less verbose and fully
+supported for android development~\cite{Moskala_Wojda_2017}. The
+user interface (UI) is written using the Jetpack Compose which
+is the recommended UI framework for new android application~\cite{android_recommendations}.
+
+QRSMS application is built with features that allow users to send and read
+regular and encrypted SMS message, generate and scan QR codes and management
+of existing keys stored in the system. To enable end-to-end encryption,
+both the sending and receiving party must
 have the application installed and have exchanged their QR code generated by
-the application through other means suggested below. In case only one party
+the application through means suggested above. In case only one party
 has the software installed, if they decide to send an encrypted message to
 a user without the application, or the recipient have not yet established the
 shared secret, the latter might receive the message in
@@ -261,40 +289,21 @@ cipher text, unable to read said text. If the opposite were to occur,
 the application should be able to determine if the received text was encrypted
 or not.
 
-When each of the user involved in the key-agreement now having generated a
+When each of the user involved in the key-agreement have succeeded in creating a
 shared secret with their intended contact, the exchange of encrypted SMS
-can now begin. AES encryption algorithm can be used generate the cipher text
-with the shared secret as the key for symmetric cryptography shown in
-fig.~\ref{encrypted}. The android platform comes with the
-\lstinline{android.telephony} package contains the classes needed for sending
-and receiving SMS messages while the \lstinline{javax.crypto} contains
-classes that allow the use ofcryptographic libraries that will help achieve
-the goals of the application~\cite{android_pkg}.
-
-Equipped with features and support for developing android applications,
-Android Studio will be used as the integrated development environment (IDE)
-to facilitate the development of the SMS client.
-The Kotlin programming language will also be used for the application as it
-fully supported for android development and it eliminates the verbosity
-of Java while allowing the use of Java libraries
-~\cite{Moskala_Wojda_2017}.
+is made available. AES algorithm with cipher block chaining (CBC) mode was used
+for symmetric cryptography using the derived secret key as the key for
+cryptographic operation shown in fig.~\ref{encrypted}.
 
 %% [3.] Conduct a usability study of the SMS client application.
-\subsection{User Testing}
+\subsection{Usability study for QRSMS}
 Throughout the duration of the development process, the features and interface
-of the system will be thoroughly tested to ensure that the program can perform
-its intended functions. However, upon the completion of a minimum viable
-product, usability test will be conducted to further inspect the working
-condition off the application as well as analyze users' thoughts with regard to
-to the system. Users will be asked to perform various tasks that involve the
+of the system are thoroughly tested to ensure that the program can perform
+its intended functions. However, upon the completion of the minimum viable
+product, usability test was conducted to gain regular users' perspective with
+regard to their thoughts on how usable and easy to use they think the system is.
+Users was asked to perform various tasks that involves the
 following capabilities of the application:
-
-\begin{figure}
-	\centering
-	\includegraphics[height=3.5in]{./images/QRSMS_inbox.png}
-	\caption{QRSMS Inbox UI Prototype}
-	\label{QRSMSUI}
-\end{figure}
 
 \begin{itemize}
 	\item[1.] Generation of QR code containing the public key to be used for
@@ -305,107 +314,29 @@ following capabilities of the application:
 	\item[5.] Management of stored keys
 \end{itemize}
 
-Along with the given tasks are questionnaire that aims to understand users'
-perspective throughout their usage of the application. Single Ease Question
-(SEQ) will be asked after completing each task. With measures of central
-tendency, a general sentiment can be derived on how well the users performed
-in each of the tasks. This can provide an insight on the ease-of-use of the
-system. This is followed by a System Usability Scale (SUS) Questionnaire
-to assess the system's perceived usability.
-
-\section{Expected Outcome}
-\subsection{Key-agreement with QR Code}
-Behind the SMS client's ability to conceal the contents of each message, the
-key-agreement protocol's function is vital to generate the secret key that
-will be used to encrypt each messages. Figure \ref{generate_view} shows the
-sequence of views that the user can see when they tap the generate QR in the
-inbox user interface (UI). On the other hand, when scanning a QR code,
-the sequence of views during this action is shown in figure \ref{scan_view}.
-When users A and B wants to send each other encrypted messages, User A must
-first generate a QR code intended for user B and provide them the code and
-vice-versa. Through this exchange, one of the following cases may occur.
-
-\begin{figure*}
-	\centering
-	\includegraphics[height=3.5in]{./images/Generate_QR_prototype.png}
-	\caption{QR Code generation view prototype}
-	\label{generate_view}
-\end{figure*}
-
-\begin{figure*}
-	\centering
-	\includegraphics[height=3.5in]{./images/Scan_QR_prototype.png}
-	\caption{QR Code scan view prototype}
-	\label{scan_view}
-\end{figure*}
-
-\subsubsection{Case 1: User A and B receives the correct code}
-In this case, when user A generated a QR code they correctly supplied user B's
-phone number and gave them the correct QR code. User B does the same and upon
-scanning each other's given code, the key-agreement protocol is done successfully
-and came up with the same secret key for both user. Encrypted SMS can now
-occur.
-
-\subsubsection{Case 2: User A or User B or Both receives the wrong code}
-In this case, during generation or sending of QR code, either user A or
-user B selected the incorrect phone number or supplied the incorrect QR code.
-If this happened, the application should throw a user-friendly error message
-to allow them to troubleshoot the issue and take appropriate action.
-
-\subsection{SMS Client}
-Built for the android operating system, QRSMS is an SMS client that enables
-users to exchange end-to-end encrypted messages while allowing them to
-send regular SMS if they choose to. To ensure seamless operation by the
-user, the system should be designed with a simple and user-friendly interface
-such that users of any background can make operate the application without
-much difficulty. Figure~\ref{QRSMSUI} shows a prototype of the UI upon entering
-the application in which most of the significant functions
-of the system should be present and apparent. While users should be able to
-choose to send a regular or secure SMS, the system should be able to recognize
-if the message is encrypted or not and transform it if necessary to make it
-readable by the user.
-
-In general, for the SMS client perform its intended function, the following
-requirements must be considered. The application should be able to:
+Testers were invited through a social media post containing the details of the test, and links to the questionnaire. Anyone interested and willing can participate in testing the application granted that they meet the following requirements:
 \begin{itemize}
-	\item[1.] Encrypt and send SMS message.
-	\item[2.] Decrypt and read SMS message.
-	\item[3.] Generate a private and public key pair then encode it into a
-		QR Code.
-	\item[4.] Decode the QR code to generate the shared secret.
-	\item[5.] Allow users to manage saved keys.
+	\item[1.] Users has an android device with version 7 (Nougat) or higher.
+	\item[2.] Users are registered to a postpaid plan or an unlimited text to all network package from any mobile provider.
+	\item[3.] Users device has a working rear camera.
 \end{itemize}
+The test was open for a week and qualified participants can do the test at anytime to their liking.
 
-\subsection{Understanding System Usability and Ease of Use}
-In general, user testing allows for understanding how a system performs in
-real world applications. Having users test and evaluate the system enables
-the researchers to recognize the potential of the proposed approach.
-With the way the key-agreement protocol is designed, users might initially
-find this method different from what they are used to. Users has to initiate
-the exchange themselves with the QR code to simplify the act of inputting of
-keys. But an intuitive and well-designed interface should be able to guide
-the users to take their intended actions. Because of the popularity of QR code,
-users generally recognizes it and knows how to use it. However, knowing what
-aspect of the system users found the most useful and
-easy to operate can help identify further improvements to be made.
+The questionnaire was given as a Google form and can be done by the user
+without the researcher's guide. The form also includes instructions that can
+help them get started in the unmoderated test. Single Ease Question
+(SEQ) was asked right after completing each task which aims to understand
+how easy or difficult they found each task to be.
+This is followed by a standard System Usability Scale (SUS) (fig.~\ref{sus_standard}) after completing the tasks to assess the system's perceived usability.
 
-\section{Implementation}
+\begin{figure}
+	\centering
+	\includegraphics[height=3.5in]{./images/Standard System Usability Scale.png}
+	\caption{Standard System Usability Scale~\cite{sus_scale}}
+	\label{sus_standard}
+\end{figure}
 
-\subsection{Key-agreement protocol with QR Codes}
-To allow users to exchange end-to-end encrypted messages, each participants
-in a conversation must first generate an elliptic curve (EC) keypair for their
-chosen contact. From the QRSMS app, this can be achieved by going from the
-inbox screen, select "Generate QR", then select or input the contact that
-this keypair will be created for. This will then forward the user to a screen
-that shows a QR code that contains the public key from the generated keypair.
-They can show the QR code to the person, save it to their device or share it
-via other application (fig. \ref{generate_qr_code}).
-Once each of the participants have their partner's QR Code, they can start
-scanning the given code through their mobile phone's camera (fig. \ref{scan_qr_code}).
-The scanning process will check if the code is a valid code, and then attempt
-to initiate an Elliptic Curve Diffie-Hellman (ECDH) key agreement with the
-said contact. Once this step is done for both users, they can now begin
-exchanging encrypted messages.
+\section{Results and Discussion}
 
 \begin{figure*}
 	\centering
@@ -421,176 +352,101 @@ exchanging encrypted messages.
 	\label{scan_qr_code}
 \end{figure*}
 
+\subsection{Key-agreement protocol with QR Codes}
+To allow users exchange end-to-end encrypted messages, each participant
+in a conversation must first generate an elliptic curve (EC) keypair for their
+chosen contact. From the QRSMS app, this can be achieved by going from the
+inbox screen, select "Generate QR", then select or input the contact that
+this keypair will be created for. This will then forward the user to a screen
+that shows a QR code that contains the public key from the generated keypair.
+They can show the QR code to the person, save it to their device or share it
+via other application (fig. \ref{generate_qr_code}).
+
+
+After receiving their contact's QR Code, they can scan the given code
+through their mobile phone's camera (fig. \ref{scan_qr_code}).
+The scanning process will check if the code is a valid code, and then attempt
+to initiate an Elliptic Curve Diffie-Hellman (ECDH) key agreement with the
+said contact. Once this step is done for both users, they can now begin
+exchanging encrypted messages.
 
 
 \subsubsection{Key pair generation}
-In order to generate an EC key pair for the given contact, an EcKeyGen class
-was created. This class uses the \lstinline{KeyPairGenerator} class from the
-\lstinline{java.security} package. Depending on the device's android version/
-API level, generation of keypair can slightly differ. For devices with android
-version lower than 12 (API level 31 and below), an instance of this generator
-can be obtained using the \lstinline{getInstance()} method providing the standard
-algorithm name that will be used for key pair generation, which in this case is
-\lstinline{"EC"}. The key pair generator can then be initialized using the
-\lstinline{initialize()} method, passing an \lstinline{ECGenParameterSpec} instance.
-In the case of QRSMS app, the \lstinline{secp256r1} was used as the curve for
-the algorithm. The \lstinline{generateKeyPair()} method can then be called which
-returns a public and private keypair. This keypair can then be saved in a
-\lstinline{Room} database that is encrypted using \lstinline{SQLCipher}.
+In order to generate an EC key pair for a given contact, the
+\texttt{KeyPairGenerator} class from the \texttt{java.security}
+package was used. Before the final key pair can be obtinaned, this class
+must first be instantiated and initialized. In the application, doing this
+actions can slightly differ depending on the device's API level.
 
-On the otherhand, for devices of API level 31 and above, additional parameters
-can be provided in the methods above. To get an instance of the
-\lstinline{KeyPairGenerator} class, an additional provider \lstinline{"AndroidKeyStore"}
-can be passed to the \lstinline{genInstance()} method to allow the generator
-to generate the key pair directly to Android's Keystore system. To initialize
-the generator, a parameter spec is still needed as its parameter. However,
-in this approach, the \lstinline{KeyGenParameterSpec.Builder} class can be
-used to create the parameter spec. Simply supply the alias for the key entry
-and add the purpose of this key. The \lstinline{KeyProperties} from the
-\lstinline{android.security.keystore} package contains the
-\lstinline{PURPOSE_AGREE_KEY} constant to ensure that this key can only
-be used for generating a shared secret using the ECDH algorithm.
-The builder class also provides methods such as
-\lstinline{setAlgorithmParameterSpec()} where the
-\lstinline{ECGenParameterSpec} can be passed so that the
-\lstinline{AndroidKeyStore} generates an EC key pair.
-Once the \lstinline{generateKeyPair()} method is
-called, a keypair entry will automatically be added in the keystore rather
-than having to manually add it in a database. The reason this can only be done
-for API level 31 and above is because the \lstinline{PUROSE_AGREE_KEY} constant
-was only added starting from this API.
+\subsubsection*{API level 31 and above}
+If the device's API level is 31 or higher --- that is, starting from android
+version 12, an instance of the \texttt{KeyPairGenerator} class can be
+instantiated with the \texttt{getInstance()} method
+by adding the algorithm name \texttt{EC} as the first parameter
+and giving the string \texttt{AndroidKeyStore} in the provider field.
+The generator is then initialized by building an \texttt{AlgorithmParameterSpec}
+using the \texttt{KeyGenParameterSpec.Builder} class.
+An alias which is the identifier for the key when stored inside the
+AndroidKeyStore system is provided as well as the intended purpose of the key
+which is available as the constant \texttt{PURPOSE\char`_AGREE\char`_KEY} from the
+\texttt{KeyProperties} class are added to the builder. This ensures that the
+key material can only be used for the ECDH key-agreement. The parameter
+spec for EC was set with the \texttt{setAlgorithmParameterSpec()} method
+so that the generated key pair will be under the \texttt{secp256r1} curve.
+Finally, the \texttt{generateKeyPair()} method of the generator class is
+invoked which creates a KeyPair entry inside the AndroidKeyStore.
+
+\subsubsection*{API level 24 to 30}
+For devices with API level 24 to 30 (Android 7 to 11), the generation process involves
+the same instantiation and initialization. To get an instance of the
+generator, the \texttt{getInstance()} method is called with the standard
+algorithm name added as a parameter. In this case, adding a provider is
+optional. Similarly, when initializing the generator, only the
+\texttt{AlgorithmParameterSpec} is needed. A call can then be made to the
+\texttt{generateKeyPair()} method which returns a KeyPair object. However,
+because the \texttt{PURPOSE\char`_AGREE\char`_KEY} is only added from
+API 31 and above, the keypair is manually inserted to a Room database which is
+an abstraction layer for SQLite~\cite{room}, and is encrypted using the
+SQLCipher for android~\cite{sqlcipher} library.
 
 \subsubsection{QR Code Generation}
-Once a keypair is generated, the public key along with the phone number
-of the owner of that key is encoded in a QR code. Since the public key is a
-\lstinline{Public Key} object, is must first be decoded into byte array
-and then converted into a base64 string since the qr code generator
-encodes a string.
+Once a key pair is generated, the public key along with the phone number
+of the user is encoded in a QR code with the format of
+\texttt{<phone\char`_number>:<public\char`_key\char`_in\char`_base\char`_64>}.
+Since the public key is a \texttt{PublicKey} object, it must first be
+encoded into byte array and then converted into a base64 since the qr code generator encodes a string.
 
-QR Code generation was achieved using the \lstinline{com.google.zxing} library
+QR Code generation was achieved using the \texttt{com.google.zxing} library
 adding it to the app as a dependency. With this library, the qr code
-generator can use the \lstinline{qrcode.QRCodeWriter} class which contains
-the \lstinline{encode()} method that can be used to generate the QR Code by
-passing the text to be encoded, the format/type of the Barcode, the width
-and height, and additional hints that can be added to the QR Code. A
-\lstinline{QrUtils} object was created that provides the
-\lstinline{generateQrCode()} method to handle this functionality.
-The encoded QR Code
-is converted as a Bitmap image so that it can be displayed to the user.
-The QR code can then be saved to the user's device or shared via other
-applications using android \lstinline{Intents}.
+generator can use the \texttt{qrcode.QRCodeWriter} class which contains
+the \texttt{encode()} method that can be used to generate the QR Code by
+passing the text to be encoded, format/type of the barcode, width
+and height, and additional hints that can be added to the QR Code.
+The encoded QR Code is converted into a Bitmap image so that it can be displayed to the user. This QR code can then be saved to the user's device or shared via other
+applications using android \texttt{Intents}.
 
 \subsubsection{QR Code Scanning}
-QR Code scanning capabilities are provided by android \lstinline{CameraX}
-library as well as google's \lstinline{MLKit Vision}. Google MLKit Barcode
-Scanning provides support for detecting different types of Barcode
-including QR Codes by providing the \lstinline{BarcodeScannerOptions.Builder}
-class. The \lstinline{CameraX} library enables the app to use the camera
-and attach its preview to a \lstinline{PreviewView}. The \lstinline{CameraX}
-package also has a library with built in integration of Google's MLKit vision.
-By using the \lstinline{setImageAnalysisAnalyzer()} method, the
-\lstinline{BarcodeScannerOptions} is passed to the \lstinline{MlKitAnalyzer}
+QR Code scanning capabilities are provided by android's CameraX with Google's MLKit analyzer and barcode scanning. The \texttt{CameraX} library enables the app to use the camera and attach its preview to a \texttt{PreviewView}. The CameraX
+package also provides built-in integration of Google's MLKit analyzer.
+By using the \texttt{setImageAnalysisAnalyzer()} method, the
+\texttt{BarcodeScannerOptions} is passed to the \lstinline{MlKitAnalyzer}
 class so that the camera can detect QR Codes and decode its content. If the
 analyzer detects a valid QR Code, it will then attempt to perform
 a key exchange.
 
-\subsubsection{Key-Agreement}
-The encoded text follows the following format -
-\lstinline{"normalized_phone_number_of_owner:public_key"}. After decoding the
-contents of the QR code, the application first checks if the contents is in
-the said format. If it is, the application proceeds to perform an
-ECDH key agreement.
+\begin{figure}
+	\centering
+	\includegraphics[height=3in]{./images/QRSMS Inbox Screen.png}
+	\caption{QRSMS Inbox Screen}
+	\label{inbox_screen}
+\end{figure}
 
-The QRSMS source code includes an \lstinline{EcdhKeyAgreement} class which takes
-the phone numbers of the involved parties, the public key in base64 format
-which is encoded in the given QR Code, and an instance of a
-\lstinline{KeyManager} class which is responsible for managing all keypairs
-and secret keys within the application. This class uses the
-\lstinline{KeyAgreement} class from the \lstinline{javax.crypto} package
-that provides a method for generating a shared secret and an instance of the
-\lstinline{KeyFactory} class from \lstinline{java.security} package is
-used to reconstruct the public key material from a byte array. Once a
-shared secret has been derived, it is further processed through a Hash-Based
-Key Derivation function (HKDF) from \lstinline{at.favre.lib.hkdf}
-to get a secret key than can be used for encryption and decryption. The
-involved users information such as their mobile phone as well as
-their public key information is added to the HKDF to the info parameter
-of the function to provide additional protection. The derived key is then
-stored inside the \lstinline{AndroidKeyStore} for encryption and decryption.
-
-\subsection{SMS Client}
-QRSMS is a SMS application with support for end-to-end encryption for
-android devices. The application is available for android 7 (Nougat)
-up to Android 14. The client is built with the kotlin programming language
-and uses android jetpack compose for the UI framework.
-
-While the generation and scanning of QR code is described
-in the previous sections, the client also provides users the ability to
-send and read regular and encrypted messages. To send a message, the user can
-either select a conversation from the inbox screen which will take the user
-to the conversation screen that displays the thread of messages exchanged,
-or select the create message icon in the lower right portion of the screen. %Figure
-Using the create message approach moves the user to a screen where they can
-select a contact number or enter the phone number of the receipient.
-
-In the conversation screen, if the user has an existing secret key with the
-contact (e.g. they have previously performed a key-agreement), a select
-message type icon appears in front of the input box which will show a dialog
-where the user can select either to send a regular or an encrypted SMS message.
-Regardless of what type of message the user chooses to send, sending the
-the message is done through the \lstinline{SmsManager} class that the
-android system provides. However, choosing to send an encrypted SMS message
-includes additional processing to the text before sending it to the
-receipient (fig. \ref{send_encrypted_message}).
-On the other hand, decryption of SMS message is done automatically
-by the application such that when the user opens a conversation that includes
-an encrypted text, the application will automatically decrypt the message
-if the key used to encrypt the message is available
-(fig. \ref{read_encrypted_message}). If the same message is attempted
-to be viewed from the default sms app, users will only see a message
-in base 64 (fig. \ref{default_sms_app}).
-
-The app also provides a way to view and manage existing keys. The key
-management screen can be accessed by pressing the vertical ellipsis at the
-top right of the screen which brings out a menu where Manage Keys can be
-selected (fig. \ref{manage_keys_screen}) .
-Users can view the QR code which forwards them to the screen displayed
-after generating a QR Code and also a delete button. The screen also
-gives indication if end-to-end encryption is available for a given
-contact.
-
-\subsubsection{Message Encryption}
-If the user choose to send an encrypted message, the text is encrypted
-using the \lstinline{Cipher} class from the \lstinline{javax.crypto} package.
-Android supports the "AES/CBC/PKCS7Padding" transformation which is used
-to create an instance of the \lstinline{Cipher} class. It is then initialized
-using the \lstinline{init()} method providing the \lstinline{ENCRYPT_MODE}
-constant to indicate that the cipher object is used for encryption
-as well as the secret key object obtained from the AndroidKeyStore.
-The \lstinline{doFinal()} method performs the encryption process to the
-message and returns the ciphertext in byte array. The cipher object
-also automatically generates an initialization vector (IV) for each encryption.
-The IV is prepended before the cipher text and converted into base 64 string.
-Before sending the encrypted message to the receiver, the author chose the
-\lstinline{Start of Heading + Start of Text} unicode characters to indicate
-the beginning of the encrypted message and the
-\lstinline{End of Text + End of Transmission} characters to indicate the end.
-This characters are also converted to base 64 so that the SMS message will not
-be converted to UTF-8 encoding which reduces the maximum length of a message
-from 160 to just 70.
-
-\subsubsection{Message Decryption}
-Decryption of a message is done automatically when a conversation is opened.
-When rendering a message to the screen, the application checks if the current
-message is encrypted. If it is, processing is performed on the message to
-display the original text. Before initializing the cipher object, the
-IV must first be extracted from the base 64 string and then reconstructed
-using the \lstinline{IvParameterSpec} from \lstinline{javax.crypto.spec}
-package. With the IV extracted, the cipher object can now be initialized
-with \lstinline{DECRYPT_MODE} as its mode of operation, the secret key
-shared with the contact, and the extracted iv. The \lstinline{doFinal()}
-method can then be performed on the cipher text which will decrypt the
-given message.
+\begin{figure}
+	\centering
+	\includegraphics[height=3in]{./images/QRSMS Select Contact Screen.png}
+	\caption{QRSMS New Conversation Screen}
+	\label{new_conversation}
+\end{figure}
 
 \begin{figure*}
 	\centering
@@ -601,37 +457,214 @@ given message.
 
 \begin{figure}
 	\centering
-	\includegraphics[height=3.5in]{./images/read_encrypted.png}
+	\includegraphics[height=3in]{./images/read_encrypted.png}
 	\caption{Reading Encrypted Message}
 	\label{read_encrypted_message}
 \end{figure}
 
+\subsubsection{Key-Agreement}
+Upon decoding a valid QR code for QRSMS, the application attempts to perform an ECDH key agreement. Since the phone number of the contact is also embedded inside the QR code, the system checks if there is an existing key pair stored in either the room database or the android keystore system depending on the device's supported API level. If there is, the system performs ECDH key agreement by taking the user's private key for the contact and their public key as parameters. In the same step, the contact's public key gets parsed back into a byte array from the base 64 string that it is from the decoding step.
+
+The \texttt{KeyAgreement} class contains the function needed to generate a shared secret key. To use it, an instance of this class was obtained by using the \texttt{getInstance()} method with the key-agreement algorithm name --- \texttt{"ECDH"} as the parameter. This instance was initialized by giving the private key of the user as a parameter to the \texttt{init} method. Then, the \texttt{doPhase()} method is invoked with the contact's public key as the first parameter and a boolean value of true to signify that this is the last phase of the key-agreement. The \texttt{generateSecret()} method finally generates the shared secret key based on the key objects provided in the earlier phases. This secret key is further processed using through a HMAC-based Extract-and-Expand Key Derivation Function (HKDF) by adding the \texttt{at.favre.lib.hkdf} library. A salt based on the phone numbers of the users involved in the exchange along with the generated shared secret key is given to the hkdf \texttt{extract} function to create a pseudorandom key. Before the expand phase, the algorithm string, the user and their contact's public key bytes are combined to form the info parameter. The pseudorandom key, info, and length of 32-bytes is provided as parameter to the hkdf \texttt{expand} function which outputs the final secret key material of the given length that will be used for the encryption and decryption algorithm. The derived key is then stored inside the \texttt{AndroidKeyStore} for encryption and decryption, using the contact's phone number as the key's alias.
+
+\subsection{SMS Client}
+While the generation and scanning of QR code is described in the previous sections, the client also provides users the ability to send and read regular and encrypted messages.
+Messages are retrieved from the default SMS application's content provider to ensure that the built-in SMS application remains operational even with QRSMS installed.
+To send a message, the user can either select a conversation from the inbox screen (fig.~\ref{inbox_screen}) which will take the user to the conversation screen that displays the thread of past messages, or select the create message icon in the lower right portion of the screen. Using the new conversation approach moves the user to a screen where they can select a contact or enter the phone number of the recipient (fig.~\ref{new_conversation}).
+
+In the conversation screen, if the user has an existing secret key with the
+contact (e.g. they have previously performed a key-agreement), a select
+message type icon appears in front of the message input box which will show a dialog
+where the user can select either to send a regular or an encrypted SMS.
+Regardless of what type of message the user chooses to send, sending
+the message is done through the \texttt{SmsManager} class that the
+android system provides. However, choosing to send an encrypted SMS message
+includes additional processing to the text before sending it to the
+recipient (fig. \ref{send_encrypted_message}).
+On the other hand, decryption of SMS message is done automatically
+by the application such that when the user opens a conversation that includes
+an encrypted text, the application will automatically attempt to decrypt the message, given that the key used to encrypt the message is available
+(fig. \ref{read_encrypted_message}). If the same message is attempted
+to be viewed from the default SMS app, or if the corresponding key is not available (e.g the key is deleted, the user has not scanned the code for that specific contact), users will only see a string of text in base 64 (fig. \ref{default_sms_app}).
+
+The app also provides a way to view and manage existing keys. The key
+management screen can be accessed by pressing the vertical ellipsis at the
+top right of the screen which brings out a menu where Manage Keys can be
+selected (fig.~\ref{manage_keys_screen}).
+Users can view the QR code which forwards them to the screen displayed
+after generating a QR Code and also a delete button. The screen also
+gives indication if end-to-end encryption is available for a given
+contact.
+
 \begin{figure}
 	\centering
-	\includegraphics[height=3.5in]{./images/default_sms_app.png}
+	\includegraphics[height=3in]{./images/default_sms_app.png}
 	\caption{Encrypted message as viewed in default sms app}
 	\label{default_sms_app}
 \end{figure}
 
 \begin{figure}
 	\centering
-	\includegraphics[height=3.5in]{./images/manage_keys_screen.jpg}
+	\includegraphics[height=3in]{./images/QRSMS Manage Keys Screen.png}
 	\caption{Key Management Screen}
 	\label{manage_keys_screen}
 \end{figure}
 
-% APPENDICES
-%\appendices
+\subsubsection{Message Encryption}
+If the user choose to send an encrypted message, the text is encrypted
+using the \texttt{Cipher} class from the \texttt{javax.crypto} package.
+Android supports the \texttt{"AES/CBC/PKCS7Padding"} transformation which is used
+to create an instance of the cipher class. It is then initialized
+using the \texttt{init()} method providing the \texttt{ENCRYPT\char`_MODE}
+constant to indicate that the cipher object is used for encryption
+as well as the secret key object obtained from Android KeyStore.
+The \texttt{doFinal()} method encrypts the message and returns the ciphertext in byte array. The cipher object also automatically generates an initialization vector (IV) for each encryption. The IV is prepended before the cipher text and converted into base 64 string. Before sending the encrypted message to the receiver, the author chose the
+\texttt{Start of Heading + Start of Text} unicode characters to indicate
+the beginning of the encrypted message and the
+\texttt{End of Text + End of Transmission} characters to indicate the end.
+This characters are also converted to base 64 so that the SMS message will not
+be converted to UTF-8 encoding which reduces the maximum length of a message
+from 160 to just 70.
 
-%\section{Proof of the First Zonklar Equation}
+\subsubsection{Message Decryption}
+Decryption of a message is done automatically when a conversation is opened.
+When rendering a message to the screen, the application checks if the current
+message is encrypted. Encrypted messages are identified by checking if the given text has the prepended and appended characters. If it is, the flags are striped from the ciphertext. Before initializing the cipher object, the
+IV must be extracted from the base 64 string and then reconstructed
+using the \texttt{IvParameterSpec}. With the IV extracted, the cipher object can now be initialized with \texttt{DECRYPT\char`_MODE} as its mode of operation, the secret key
+shared with the contact, and the extracted iv. The \texttt{doFinal()}
+method can then be performed on the cipher text which will decrypt the
+given message.
+
+
+\subsection{QRSMS Usability Testing}
+During the testing period, 14 respondents had tested and evaluated the application. Graph~\ref{seq_graph} and table~\ref{sus_response} shows the result of users' response for the SEQ and SUS respectively.
+
+\subsubsection{Single Ease Question}
+Users were given a total of 9 tasks as shown in table~\ref{tasks_table} where they are asked how they found its difficulty after the completion of each task. On average, users found each task with relative ease scoring an average of greater than 5 for most of the task except for tasks 6 and 7 with an average score of 4.43 and 4.50 respectively which are related to sending SMS message with a standard deviation of between 2.0 to 2.4. This could be due to a technical error in the application where in some cases, messages could not be sent. This assumption cannot be made certain though as there were no follow-up questions to ask users why they gave the task a certain score. Overall, users generally found the application fairly easy to use.
+
+\subsubsection{System Usability Scale}
+After testing out all core functionality of the system, users were asked to answer a standard System Usability Scale. SUS scores are calculated for each user where the scale value for odd numbered items were subtracted by 1, while the value for even numbered items were subtracted to 5. The difference is multiplied by 2.5 and is summed to get the overall usability of the system for a user~\cite{sus_scale}. In total, the average SUS score for QRSMS is 58.93. This suggests that users' overall experience with the system is not the worst but also not the best~\cite{Bangor_2009}.
+
+\section{Conclusion}
+This paper has shown a different approach to end-to-end encryption via the use of QR codes. The author was able to develop an android application that is capable of generate key pairs which can be encoded in a QR code, decode one from a contact to initiate an ECDH key agreement. The client is also capable of sending and reading regular and encrypted SMS based on the user's needs. Based on the result of the usability testing, it seems that despite being relatively easy to use for the average user scoring an average greated than 5 except for 2 tasks, not many may find it very appealing to use for their everyday use with a average SUS score of 58.93.
+
+\section{Recommendations and Future Works}
+Users generally have different needs and requirements when it comes to the apps that they use for their daily lives. For future researches, it might be beneficial if the system is implemented and tested in an environment where confidentiality is much more critical than the average user. The idea of using SMS and QR codes to enable end-to-end encryption might also be of use in other domains such as Internet-of-things for example. This paper has shown how such system can be utilized for a more generalized use case such as person-to-person communication. However, more specialized fields might benefit more from the advantage that this system brings. Future works based on this system might also want to consider a different approach when testing the application.
+
+The QRSMS client itself are also open for more feature set as well as some quality of life improvements. At its current state, features such as being able to switch between sim cards on demand, being able to add an image from the device's storage for QR scanning, and better and user-friendly prompts that requires user's attention can be added among many others. Overall, QRSMS is a product that shows a different approach to end-to-end security using existing tools and technology.
+
+\begin{figure}[b]
+	\centering
+	\includegraphics[width=2.5in]{./images/seq_graph.png}
+	\caption{Graph of average SEQ response with standard deviation where the x-axis corresponds to the task in table \ref{tasks_table} and the y-axis is the difficulty rating}
+	\label{seq_graph}
+\end{figure}
+
+\begin{table}
+	\begin{tabular}{|l|>{\raggedright}p{2cm}|p{4cm}|}
+		\hline
+		No.     & Task                                      & Task Description                                                                                                                                       \\ \hline
+		1       & View conversation                         & Select a conversation to view in the inbox screen or create one by composing a new message.                                                            \\ \hline
+		2       & Generate
+		QR Code & Generate a QR code for a selected contact                                                                                                                                                          \\ \hline
+		3       & Save generated QR Code                    & After the QR Code generation task, save the QR code to the device’s gallery                                                                            \\ \hline
+		4       & Share generated QR Code                   & After the QR Code generation task, share the QR code through other platform using the share function                                                   \\ \hline
+		5       & Scan QR Code                              & Scan a valid QRSMS code received from a contact using your camera                                                                                      \\ \hline
+		6       & Send a regular SMS message                & Select a conversation in the inbox screen or compose a new message to a contact                                                                        \\ \hline
+		\rowcolor
+		7       & Send an encrypted SMS message             & After giving a contact your QR code and scanning their’s,  switch message type to Encrypted Message, and send an encrypted SMS message to that contact \\ \hline
+		8       & View generated QR Code                    & Find the “Manage Keys” screen and view the generated QR Code of a contact                                                                              \\ \hline
+		9       & Delete QR Code                            & Find the “Manage Keys” Screen and delete the generated QR Code of a contact                                                                            \\ \hline
+	\end{tabular}
+	\centering
+	\caption{Tasks users performed during SEQ}
+	\label{tasks_table}
+\end{table}
+
+
+\begin{table}
+	\begin{tabular}{| c | c |}
+		\hline
+		\multicolumn{1}{|l|}{Respondent number} & SUS Score      \\ \hline
+		1                                       & 55.00          \\ \hline
+		2                                       & 37.50          \\ \hline
+		3                                       & 75.00          \\ \hline
+		4                                       & 50.00          \\ \hline
+		5                                       & 50.00          \\ \hline
+		6                                       & 62.50          \\ \hline
+		7                                       & 80.00          \\ \hline
+		8                                       & 72.50          \\ \hline
+		9                                       & 70.00          \\ \hline
+		10                                      & 50.00          \\ \hline
+		11                                      & 55.00          \\ \hline
+		12                                      & 62.50          \\ \hline
+		13                                      & 32.50          \\ \hline
+		14                                      & 72.50          \\ \hline
+		Average                                 & \textbf{58.93} \\ \hline
+	\end{tabular}
+	\centering
+	\caption{Individual SUS Score for each respondents}
+	\label{sus_response}
+
+\end{table}
+
+% APPENDICES
+%%\appendices
+\begin{appendices}
+
+	\section{Google Form Questionnaire}
+	\clearpage
+	\includepdf[pages=1-3]{./QRSMS_Usability Testing.pdf}
+
+	\onecolumn
+	\centering
+	\section{Usability Test Invitation Poster}
+	\begin{figure*}[h!]
+		\centering
+		\includegraphics[width=6in]{./images/Testers invitation poster.png}
+		\caption{Usability test invitation poster}
+	\end{figure*}
+
+	\clearpage
+	\section{UI Flows}
+	\begin{figure*}[h!]
+		\centering
+		\includegraphics[height=4in]{./images/Conversation Screen Flow.png}
+		\caption{Conversation screen UI Flow}
+	\end{figure*}
+
+	\begin{figure*}[h!]
+		\centering
+		\includegraphics[height=4in]{./images/Generate QR Flow.png}
+		\caption{Generate QR Screen UI Flow}
+	\end{figure*}
+
+	\begin{figure*}[h!]
+		\centering
+		\includegraphics[height=4in]{./images/Scan QR Flow.png}
+		\caption{Scan QR Screen UI Flow}
+	\end{figure*}
+
+	\begin{figure*}[h!]
+		\centering
+		\includegraphics[height=4in]{./images/Manage Keys Flow.png}
+		\caption{Manage keys UI Flow}
+	\end{figure*}
+
+\end{appendices}
+
+\twocolumn
+
+
 %Appendix one text goes here...
 %
 %\section{}
 %Appendix two (without title) text goes here...
 
 % ACKNOWLEDGMENT
-%\section*{Acknowledgment}
-%Many thanks to...
+\section*{Acknowledgment}
+The author would like to offer their deepest gratitude to Prof. Jaderick P. Pabico, adviser, for providing his time and guidance throughout the process. His insights and suggestions has been critical for the writing of this paper.
 
 % BIBLIOGRAPHY
 \bibliographystyle{./IEEE/IEEEtran}
@@ -639,8 +672,10 @@ given message.
 % \nocite{*}
 
 % BIOGRAPHY
-%\begin{biography}[{\includegraphics{./yourPicture.eps}}]{Student M. Name}
-%Biography text here...
-%\end{biography}
+\begin{biography}[{\includegraphics[width=1in, height=1.5in]{./ramos.eps}}]
+	{John Mel R. Ramos}
+
+	is a BS Computer Science student in the \UPLB. With interest in problem solving through programming, he wants to focus on a path towards software development. He is a member of the Alliance of Computer Science Students.
+\end{biography}
 
 \end{document}
