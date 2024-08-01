@@ -1,14 +1,10 @@
 \documentclass[journal]{./IEEE/IEEEtran}
 \usepackage{cite,graphicx}
 \usepackage{url}
-\usepackage{float}
 \usepackage{pdfpages}
 \usepackage{listings}
 \usepackage{multirow}
-\usepackage{multicol}
 \usepackage{array}
-\usepackage[table,xcdraw]{xcolor}
-\usepackage{ragged2e}
 
 \newcommand{\SPTITLE}{QRSMS: A SMS client with end-to-end encryption via Quick Response (QR) code}
 \newcommand{\ADVISEE}{John Mel R. Ramos}
@@ -572,7 +568,7 @@ The QRSMS client itself are also open for more feature set as well as some quali
 		4       & Share generated QR Code                   & After the QR Code generation task, share the QR code through other platform using the share function                                                   \\ \hline
 		5       & Scan QR Code                              & Scan a valid QRSMS code received from a contact using your camera                                                                                      \\ \hline
 		6       & Send a regular SMS message                & Select a conversation in the inbox screen or compose a new message to a contact                                                                        \\ \hline
-		\rowcolor
+
 		7       & Send an encrypted SMS message             & After giving a contact your QR code and scanning their’s,  switch message type to Encrypted Message, and send an encrypted SMS message to that contact \\ \hline
 		8       & View generated QR Code                    & Find the “Manage Keys” screen and view the generated QR Code of a contact                                                                              \\ \hline
 		9       & Delete QR Code                            & Find the “Manage Keys” Screen and delete the generated QR Code of a contact                                                                            \\ \hline
@@ -620,7 +616,7 @@ The QRSMS client itself are also open for more feature set as well as some quali
 	\onecolumn
 	\centering
 	\section{Usability Test Invitation Poster}
-	\begin{figure*}[h!]
+	\begin{figure*}[!ht]
 		\centering
 		\includegraphics[width=6in]{./images/Testers invitation poster.png}
 		\caption{Usability test invitation poster}
@@ -628,25 +624,25 @@ The QRSMS client itself are also open for more feature set as well as some quali
 
 	\clearpage
 	\section{UI Flows}
-	\begin{figure*}[h!]
+	\begin{figure*}[!h]
 		\centering
 		\includegraphics[height=4in]{./images/Conversation Screen Flow.png}
 		\caption{Conversation screen UI Flow}
 	\end{figure*}
 
-	\begin{figure*}[h!]
+	\begin{figure*}[!h]
 		\centering
 		\includegraphics[height=4in]{./images/Generate QR Flow.png}
 		\caption{Generate QR Screen UI Flow}
 	\end{figure*}
 
-	\begin{figure*}[h!]
+	\begin{figure*}[!h]
 		\centering
 		\includegraphics[height=4in]{./images/Scan QR Flow.png}
 		\caption{Scan QR Screen UI Flow}
 	\end{figure*}
 
-	\begin{figure*}[h!]
+	\begin{figure*}[!h]
 		\centering
 		\includegraphics[height=4in]{./images/Manage Keys Flow.png}
 		\caption{Manage keys UI Flow}
