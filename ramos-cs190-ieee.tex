@@ -1,8 +1,14 @@
 \documentclass[journal]{./IEEE/IEEEtran}
 \usepackage{cite,graphicx}
 \usepackage{url}
+\usepackage{float}
+\usepackage{pdfpages}
 \usepackage{listings}
 \usepackage{multirow}
+\usepackage{multicol}
+\usepackage{array}
+\usepackage[table,xcdraw]{xcolor}
+\usepackage{ragged2e}
 
 \newcommand{\SPTITLE}{QRSMS: A SMS client with end-to-end encryption via Quick Response (QR) code}
 \newcommand{\ADVISEE}{John Mel R. Ramos}
@@ -98,18 +104,11 @@ completely based on symmetric key cryptography. Similarly, SmartSMS
 These protocols however, requires additional resources and infrastructure
 on the side of the service provider in order to be implemented.
 
-This paper proposed an SMS client that uses
-quick-response (QR) codes for key exchange. Initially developed by Toyota's
-subsidiary Denso Wave for inventory of vehicle parts manufacturing,
-QR code has seen many applications in today's era~\cite{Tiwari_2016}.
-Able to store up to a maximum of 7,089 characters\newpage\noindent in one code~\cite{qrcode}
-it can be used to encode text, URL, and other data and can be decoded using
-a mobile device equipped with a camera and the appropriate software which can
-display a text, connect to a wireless network, open a webpage, or open a linked
-application~\cite{Shin_Jung_Chang_2012}. This client encodes the phone number
+This paper proposed an SMS client that uses quick-response (QR) codes for
+key exchange.  This client encodes the phone number
 public key needed to generate a shared secret in a QR code. The generated
 code can be shared to the intended recipient through offline (in person)
-or other secure online platform that allows sending of images.
+or other secure online\newpage\noindent platform that allows sending of images.
 
 End-to-end security is achieved through the combined use of symmetric and
 asymmetric cryptography as well a key-agreement protocol. Advanced Encryption
@@ -231,9 +230,23 @@ system~\cite{android_keystore} or room database~\cite{room} encrypted using
 SQLCipher for android~\cite{sqlcipher}.
 
 The generated public key, along with the user's phone number is then
-encoded into a QR code using the ZXing
-~\cite{zxing} library. The complementing private key is kept securely in the
+encoded into a QR code using the ZXing ~\cite{zxing} library.
+The complementing private key is kept securely in the
 appropriate storage system to be used for finalizing the key exchange.
+
+\subsubsection*{Why QR Codes?}
+Initially developed by Toyota's
+subsidiary Denso Wave for inventory of vehicle parts manufacturing,
+QR code has seen many applications in today's era~\cite{Tiwari_2016}.
+Able to store up to a maximum of 7,089 characters in one code~\cite{qrcode}
+it can be used to encode text, URL, and other data and can be decoded using
+a mobile device equipped with a camera and the appropriate software which can
+display a text, connect to a wireless network, open a webpage, or open a linked
+application~\cite{Shin_Jung_Chang_2012}. Manually inputting the key through an
+input box could introduce human errors whereas encoding data to the QR code
+makes this issue less likely. Additionally, scanning libraries provides
+functionalities that allows application developer to add an action to perform
+after scanning a valid QR code.
 
 \subsubsection{Key Exchange}
 With each party having their QR code for the other, they will exchange
@@ -246,9 +259,11 @@ contain the contact's phone number and public key string.
 After a successful scan, the system looks for a corresponding private key
 associated with the contact. This allows the system to proceed with
 the key exchange using ECDH key agreement protocol and generate a shared
-secret key that should be the same for both users involved. This secret key is
-then fed into a HMAC-based Extract-and-Expand Key Derivation Function (HKDF)
-to create the final key that will be used for AES encryption and decryption.
+secret key that should be the same for both users involved. Given user A and
+user B, ECDH is performed by taking the private key of user A
+combining it with the public key of B, and the same is done on the side of user B which generates the same secret key for both users~\cite{IBM_2023}.
+This secret key is then fed into a HMAC-based Extract-and-Expand Key
+Derivation Function (HKDF) to create the final key that will be used for AES encryption and decryption.
 
 %% [2.] Design and implement an SMS client for mobile android device  with
 %% 	end-to-end encryption.
@@ -323,6 +338,20 @@ This is followed by a standard System Usability Scale (SUS) (fig.~\ref{sus_stand
 
 \section{Results and Discussion}
 
+\begin{figure*}
+	\centering
+	\includegraphics[height=3.5in]{./images/generate_qr_code.png}
+	\caption{QR Code Generation Process}
+	\label{generate_qr_code}
+\end{figure*}
+
+\begin{figure*}
+	\centering
+	\includegraphics[height=3.5in]{./images/Scan_QR.png}
+	\caption{QR Code Scanning Process}
+	\label{scan_qr_code}
+\end{figure*}
+
 \subsection{Key-agreement protocol with QR Codes}
 To allow users exchange end-to-end encrypted messages, each participant
 in a conversation must first generate an elliptic curve (EC) keypair for their
@@ -341,19 +370,6 @@ to initiate an Elliptic Curve Diffie-Hellman (ECDH) key agreement with the
 said contact. Once this step is done for both users, they can now begin
 exchanging encrypted messages.
 
-\begin{figure*}
-	\centering
-	\includegraphics[height=3.5in]{./images/generate_qr_code.png}
-	\caption{QR Code Generation Process}
-	\label{generate_qr_code}
-\end{figure*}
-
-\begin{figure*}
-	\centering
-	\includegraphics[height=3.5in]{./images/Scan_QR.png}
-	\caption{QR Code Scanning Process}
-	\label{scan_qr_code}
-\end{figure*}
 
 \subsubsection{Key pair generation}
 In order to generate an EC key pair for a given contact, the
@@ -522,87 +538,13 @@ given message.
 
 
 \subsection{QRSMS Usability Testing}
-During the testing period, 14 respondents had tested and evaluated the application. Tables~\ref{seq_responses} and~\ref{sus_response} shows the result of users' response for the SEQ and SUS respectively.
+During the testing period, 14 respondents had tested and evaluated the application. Graph~\ref{seq_graph} and table~\ref{sus_response} shows the result of users' response for the SEQ and SUS respectively.
 
 \subsubsection{Single Ease Question}
-Users were given a total of 9 tasks as shown in table~\ref{tasks_table} where they are asked how they found its difficulty after the completion of each task. On average, users found each task with relative ease scoring an average of greater than 5 for most of the task except for tasks 6 and 7 with an average score of 4.43 and 4.50 respectively, which are related to sending SMS message. This could be due to a technical error in the application where in some cases, messages could not be sent. This assumption cannot be made certain though as there were no follow-up questions to ask users why they gave the task a certain score. Overall, users generally found the application fairly easy to use.
+Users were given a total of 9 tasks as shown in table~\ref{tasks_table} where they are asked how they found its difficulty after the completion of each task. On average, users found each task with relative ease scoring an average of greater than 5 for most of the task except for tasks 6 and 7 with an average score of 4.43 and 4.50 respectively which are related to sending SMS message with a standard deviation of between 2.0 to 2.4. This could be due to a technical error in the application where in some cases, messages could not be sent. This assumption cannot be made certain though as there were no follow-up questions to ask users why they gave the task a certain score. Overall, users generally found the application fairly easy to use.
 
 \subsubsection{System Usability Scale}
 After testing out all core functionality of the system, users were asked to answer a standard System Usability Scale. SUS scores are calculated for each user where the scale value for odd numbered items were subtracted by 1, while the value for even numbered items were subtracted to 5. The difference is multiplied by 2.5 and is summed to get the overall usability of the system for a user~\cite{sus_scale}. In total, the average SUS score for QRSMS is 58.93. This suggests that users' overall experience with the system is not the worst but also not the best~\cite{Bangor_2009}.
-
-\begin{table*}[]
-	\begin{tabular}{|l|l|p{7cm}|}
-		\hline
-		No. & Task                          & Task Description                                                                                                                                       \\ \hline
-		1   & View conversation             & Select a conversation to view in the inbox screen or create one by composing a new message.                                                            \\ \hline
-		2   & Generate QR Code              & Generate a QR code for a selected contact                                                                                                              \\ \hline
-		3   & Save generated QR Code        & After the QR Code generation task, save the QR code to the device’s gallery                                                                            \\ \hline
-		4   & Share generated QR Code       & After the QR Code generation task, share the QR code through other platform using the share function                                                   \\ \hline
-		5   & Scan QR Code                  & Scan a valid QRSMS code received from a contact using your camera                                                                                      \\ \hline
-		6   & Send a regular SMS message    & Select a conversation in the inbox screen or compose a new message to a contact                                                                        \\ \hline
-		7   & Send an encrypted SMS message & After giving a contact your QR code and scanning their’s,  switch message type to Encrypted Message, and send an encrypted SMS message to that contact \\ \hline
-		8   & View generated QR Code        & Find the “Manage Keys” screen and view the generated QR Code of a contact                                                                              \\ \hline
-		9   & Delete QR Code                & Find the “Manage Keys” Screen and delete the generated QR Code of a contact                                                                            \\ \hline
-	\end{tabular}
-	\centering
-	\caption{Tasks to test}
-	\label{tasks_table}
-\end{table*}
-
-\begin{table*}[]
-	\begin{tabular}{|c|ccccccccc|}
-		\hline
-		\multicolumn{1}{|l|}{\multirow{2}{*}{Repondent No.}} & \multicolumn{9}{c|}{Task}                                                                                                                                                                                                                                                                                                                  \\ \cline{2-10}
-		\multicolumn{1}{|l|}{}                               & \multicolumn{1}{l|}{T1}            & \multicolumn{1}{l|}{T2}            & \multicolumn{1}{l|}{T3}            & \multicolumn{1}{l|}{T4}            & \multicolumn{1}{l|}{T5}            & \multicolumn{1}{l|}{T6}            & \multicolumn{1}{l|}{T7}            & \multicolumn{1}{l|}{T8}            & \multicolumn{1}{l|}{T9}            \\ \hline
-		1                                                    & \multicolumn{1}{c|}{5}             & \multicolumn{1}{c|}{7}             & \multicolumn{1}{c|}{7}             & \multicolumn{1}{c|}{5}             & \multicolumn{1}{c|}{4}             & \multicolumn{1}{c|}{4}             & \multicolumn{1}{c|}{3}             & \multicolumn{1}{c|}{5}             & 7                                  \\ \hline
-		2                                                    & \multicolumn{1}{c|}{4}             & \multicolumn{1}{c|}{4}             & \multicolumn{1}{c|}{4}             & \multicolumn{1}{c|}{4}             & \multicolumn{1}{c|}{4}             & \multicolumn{1}{c|}{1}             & \multicolumn{1}{c|}{1}             & \multicolumn{1}{c|}{4}             & 4                                  \\ \hline
-		3                                                    & \multicolumn{1}{c|}{7}             & \multicolumn{1}{c|}{7}             & \multicolumn{1}{c|}{7}             & \multicolumn{1}{c|}{7}             & \multicolumn{1}{c|}{7}             & \multicolumn{1}{c|}{7}             & \multicolumn{1}{c|}{7}             & \multicolumn{1}{c|}{6}             & 6                                  \\ \hline
-		4                                                    & \multicolumn{1}{c|}{4}             & \multicolumn{1}{c|}{4}             & \multicolumn{1}{c|}{4}             & \multicolumn{1}{c|}{4}             & \multicolumn{1}{c|}{4}             & \multicolumn{1}{c|}{4}             & \multicolumn{1}{c|}{4}             & \multicolumn{1}{c|}{4}             & 4                                  \\ \hline
-		5                                                    & \multicolumn{1}{c|}{1}             & \multicolumn{1}{c|}{1}             & \multicolumn{1}{c|}{1}             & \multicolumn{1}{c|}{1}             & \multicolumn{1}{c|}{1}             & \multicolumn{1}{c|}{1}             & \multicolumn{1}{c|}{1}             & \multicolumn{1}{c|}{1}             & 1                                  \\ \hline
-		6                                                    & \multicolumn{1}{c|}{7}             & \multicolumn{1}{c|}{6}             & \multicolumn{1}{c|}{6}             & \multicolumn{1}{c|}{7}             & \multicolumn{1}{c|}{6}             & \multicolumn{1}{c|}{7}             & \multicolumn{1}{c|}{7}             & \multicolumn{1}{c|}{6}             & 6                                  \\ \hline
-		7                                                    & \multicolumn{1}{c|}{7}             & \multicolumn{1}{c|}{7}             & \multicolumn{1}{c|}{7}             & \multicolumn{1}{c|}{7}             & \multicolumn{1}{c|}{7}             & \multicolumn{1}{c|}{7}             & \multicolumn{1}{c|}{7}             & \multicolumn{1}{c|}{7}             & 7                                  \\ \hline
-		8                                                    & \multicolumn{1}{c|}{6}             & \multicolumn{1}{c|}{7}             & \multicolumn{1}{c|}{7}             & \multicolumn{1}{c|}{7}             & \multicolumn{1}{c|}{7}             & \multicolumn{1}{c|}{5}             & \multicolumn{1}{c|}{5}             & \multicolumn{1}{c|}{5}             & 7                                  \\ \hline
-		9                                                    & \multicolumn{1}{c|}{7}             & \multicolumn{1}{c|}{7}             & \multicolumn{1}{c|}{7}             & \multicolumn{1}{c|}{6}             & \multicolumn{1}{c|}{6}             & \multicolumn{1}{c|}{7}             & \multicolumn{1}{c|}{7}             & \multicolumn{1}{c|}{6}             & 7                                  \\ \hline
-		10                                                   & \multicolumn{1}{c|}{1}             & \multicolumn{1}{c|}{1}             & \multicolumn{1}{c|}{1}             & \multicolumn{1}{c|}{1}             & \multicolumn{1}{c|}{1}             & \multicolumn{1}{c|}{1}             & \multicolumn{1}{c|}{1}             & \multicolumn{1}{c|}{1}             & 1                                  \\ \hline
-		11                                                   & \multicolumn{1}{c|}{4}             & \multicolumn{1}{c|}{3}             & \multicolumn{1}{c|}{7}             & \multicolumn{1}{c|}{7}             & \multicolumn{1}{c|}{6}             & \multicolumn{1}{c|}{3}             & \multicolumn{1}{c|}{5}             & \multicolumn{1}{c|}{7}             & 7                                  \\ \hline
-		12                                                   & \multicolumn{1}{c|}{7}             & \multicolumn{1}{c|}{7}             & \multicolumn{1}{c|}{7}             & \multicolumn{1}{c|}{7}             & \multicolumn{1}{c|}{7}             & \multicolumn{1}{c|}{5}             & \multicolumn{1}{c|}{5}             & \multicolumn{1}{c|}{7}             & 7                                  \\ \hline
-		13                                                   & \multicolumn{1}{c|}{7}             & \multicolumn{1}{c|}{7}             & \multicolumn{1}{c|}{5}             & \multicolumn{1}{c|}{6}             & \multicolumn{1}{c|}{5}             & \multicolumn{1}{c|}{3}             & \multicolumn{1}{c|}{5}             & \multicolumn{1}{c|}{7}             & 5                                  \\ \hline
-		14                                                   & \multicolumn{1}{c|}{\textbf{7}}    & \multicolumn{1}{c|}{6}             & \multicolumn{1}{c|}{7}             & \multicolumn{1}{c|}{6}             & \multicolumn{1}{c|}{7}             & \multicolumn{1}{c|}{7}             & \multicolumn{1}{c|}{5}             & \multicolumn{1}{c|}{7}             & 7                                  \\ \hline
-		\multicolumn{1}{|l|}{\textbf{Average}}               & \multicolumn{1}{r|}{\textbf{5.29}} & \multicolumn{1}{r|}{\textbf{5.29}} & \multicolumn{1}{r|}{\textbf{5.50}} & \multicolumn{1}{r|}{\textbf{5.36}} & \multicolumn{1}{r|}{\textbf{5.14}} & \multicolumn{1}{r|}{\textbf{4.43}} & \multicolumn{1}{r|}{\textbf{4.50}} & \multicolumn{1}{r|}{\textbf{5.21}} & \multicolumn{1}{r|}{\textbf{5.43}} \\ \hline
-	\end{tabular}
-	\centering
-	\caption{Summary of response for Single Ease Question}
-	\label{seq_responses}
-\end{table*}
-
-% Please add the following required packages to your document preamble:
-% \usepackage{multirow}
-\begin{table*}[]
-	\begin{tabular}{|ccccccccccc|c|}
-		\hline
-		\multicolumn{1}{|l|}{\multirow{2}{*}{Respondent No.}} & \multicolumn{10}{c|}{Question}  & \multicolumn{1}{l|}{}                                                                                                                                                                                                                                \\ \cline{2-12}
-		\multicolumn{1}{|l|}{}                                & \multicolumn{1}{l|}{Q1}         & \multicolumn{1}{l|}{Q2} & \multicolumn{1}{l|}{Q3} & \multicolumn{1}{l|}{Q4} & \multicolumn{1}{l|}{Q5} & \multicolumn{1}{l|}{Q6} & \multicolumn{1}{l|}{Q7} & \multicolumn{1}{l|}{Q8} & \multicolumn{1}{l|}{Q9} & \multicolumn{1}{l|}{Q10} & SUS Score \\ \hline
-		\multicolumn{1}{|c|}{1}                               & \multicolumn{1}{c|}{3}          & \multicolumn{1}{c|}{2}  & \multicolumn{1}{c|}{4}  & \multicolumn{1}{c|}{4}  & \multicolumn{1}{c|}{2}  & \multicolumn{1}{c|}{4}  & \multicolumn{1}{c|}{5}  & \multicolumn{1}{c|}{4}  & \multicolumn{1}{c|}{5}  & 3                        & 55.00     \\ \hline
-		\multicolumn{1}{|c|}{2}                               & \multicolumn{1}{c|}{3}          & \multicolumn{1}{c|}{4}  & \multicolumn{1}{c|}{4}  & \multicolumn{1}{c|}{5}  & \multicolumn{1}{c|}{3}  & \multicolumn{1}{c|}{4}  & \multicolumn{1}{c|}{2}  & \multicolumn{1}{c|}{3}  & \multicolumn{1}{c|}{3}  & 4                        & 37.50     \\ \hline
-		\multicolumn{1}{|c|}{3}                               & \multicolumn{1}{c|}{4}          & \multicolumn{1}{c|}{2}  & \multicolumn{1}{c|}{4}  & \multicolumn{1}{c|}{2}  & \multicolumn{1}{c|}{4}  & \multicolumn{1}{c|}{2}  & \multicolumn{1}{c|}{4}  & \multicolumn{1}{c|}{3}  & \multicolumn{1}{c|}{4}  & 1                        & 75.00     \\ \hline
-		\multicolumn{1}{|c|}{4}                               & \multicolumn{1}{c|}{5}          & \multicolumn{1}{c|}{5}  & \multicolumn{1}{c|}{5}  & \multicolumn{1}{c|}{5}  & \multicolumn{1}{c|}{5}  & \multicolumn{1}{c|}{5}  & \multicolumn{1}{c|}{5}  & \multicolumn{1}{c|}{5}  & \multicolumn{1}{c|}{5}  & 5                        & 50.00     \\ \hline
-		\multicolumn{1}{|c|}{5}                               & \multicolumn{1}{c|}{3}          & \multicolumn{1}{c|}{3}  & \multicolumn{1}{c|}{3}  & \multicolumn{1}{c|}{3}  & \multicolumn{1}{c|}{3}  & \multicolumn{1}{c|}{3}  & \multicolumn{1}{c|}{3}  & \multicolumn{1}{c|}{3}  & \multicolumn{1}{c|}{3}  & 3                        & 50.00     \\ \hline
-		\multicolumn{1}{|c|}{6}                               & \multicolumn{1}{c|}{4}          & \multicolumn{1}{c|}{4}  & \multicolumn{1}{c|}{4}  & \multicolumn{1}{c|}{3}  & \multicolumn{1}{c|}{4}  & \multicolumn{1}{c|}{3}  & \multicolumn{1}{c|}{4}  & \multicolumn{1}{c|}{2}  & \multicolumn{1}{c|}{4}  & 3                        & 62.50     \\ \hline
-		\multicolumn{1}{|c|}{7}                               & \multicolumn{1}{c|}{4}          & \multicolumn{1}{c|}{1}  & \multicolumn{1}{c|}{5}  & \multicolumn{1}{c|}{2}  & \multicolumn{1}{c|}{4}  & \multicolumn{1}{c|}{2}  & \multicolumn{1}{c|}{4}  & \multicolumn{1}{c|}{2}  & \multicolumn{1}{c|}{3}  & 1                        & 80.00     \\ \hline
-		\multicolumn{1}{|c|}{8}                               & \multicolumn{1}{c|}{4}          & \multicolumn{1}{c|}{2}  & \multicolumn{1}{c|}{5}  & \multicolumn{1}{c|}{4}  & \multicolumn{1}{c|}{4}  & \multicolumn{1}{c|}{2}  & \multicolumn{1}{c|}{4}  & \multicolumn{1}{c|}{3}  & \multicolumn{1}{c|}{4}  & 1                        & 72.50     \\ \hline
-		\multicolumn{1}{|c|}{9}                               & \multicolumn{1}{c|}{4}          & \multicolumn{1}{c|}{3}  & \multicolumn{1}{c|}{4}  & \multicolumn{1}{c|}{3}  & \multicolumn{1}{c|}{5}  & \multicolumn{1}{c|}{2}  & \multicolumn{1}{c|}{5}  & \multicolumn{1}{c|}{2}  & \multicolumn{1}{c|}{3}  & 3                        & 70.00     \\ \hline
-		\multicolumn{1}{|c|}{10}                              & \multicolumn{1}{c|}{3}          & \multicolumn{1}{c|}{3}  & \multicolumn{1}{c|}{3}  & \multicolumn{1}{c|}{3}  & \multicolumn{1}{c|}{3}  & \multicolumn{1}{c|}{3}  & \multicolumn{1}{c|}{3}  & \multicolumn{1}{c|}{3}  & \multicolumn{1}{c|}{3}  & 3                        & 50.00     \\ \hline
-		\multicolumn{1}{|c|}{11}                              & \multicolumn{1}{c|}{3}          & \multicolumn{1}{c|}{2}  & \multicolumn{1}{c|}{3}  & \multicolumn{1}{c|}{4}  & \multicolumn{1}{c|}{3}  & \multicolumn{1}{c|}{2}  & \multicolumn{1}{c|}{3}  & \multicolumn{1}{c|}{3}  & \multicolumn{1}{c|}{4}  & 3                        & 55.00     \\ \hline
-		\multicolumn{1}{|c|}{12}                              & \multicolumn{1}{c|}{3}          & \multicolumn{1}{c|}{2}  & \multicolumn{1}{c|}{4}  & \multicolumn{1}{c|}{3}  & \multicolumn{1}{c|}{4}  & \multicolumn{1}{c|}{3}  & \multicolumn{1}{c|}{2}  & \multicolumn{1}{c|}{2}  & \multicolumn{1}{c|}{4}  & 2                        & 62.50     \\ \hline
-		\multicolumn{1}{|c|}{13}                              & \multicolumn{1}{c|}{3}          & \multicolumn{1}{c|}{4}  & \multicolumn{1}{c|}{2}  & \multicolumn{1}{c|}{4}  & \multicolumn{1}{c|}{2}  & \multicolumn{1}{c|}{4}  & \multicolumn{1}{c|}{2}  & \multicolumn{1}{c|}{4}  & \multicolumn{1}{c|}{2}  & 2                        & 32.50     \\ \hline
-		\multicolumn{1}{|c|}{14}                              & \multicolumn{1}{c|}{\textbf{4}} & \multicolumn{1}{c|}{3}  & \multicolumn{1}{c|}{3}  & \multicolumn{1}{c|}{2}  & \multicolumn{1}{c|}{4}  & \multicolumn{1}{c|}{2}  & \multicolumn{1}{c|}{3}  & \multicolumn{1}{c|}{1}  & \multicolumn{1}{c|}{5}  & 2                        & 72.50     \\ \hline
-		\multicolumn{11}{|r|}{\textbf{Average SUS Score}}     & \textbf{58.93}                                                                                                                                                                                                                                                                         \\ \hline
-	\end{tabular}
-	\centering
-	\caption{Summary of response for System Usability Scale and overall SUS Score}
-	\label{sus_response}
-\end{table*}
-
 
 \section{Conclusion}
 This paper has shown a different approach to end-to-end encryption via the use of QR codes. The author was able to develop an android application that is capable of generate key pairs which can be encoded in a QR code, decode one from a contact to initiate an ECDH key agreement. The client is also capable of sending and reading regular and encrypted SMS based on the user's needs. Based on the result of the usability testing, it seems that despite being relatively easy to use for the average user scoring an average greated than 5 except for 2 tasks, not many may find it very appealing to use for their everyday use with a average SUS score of 58.93.
@@ -612,16 +554,117 @@ Users generally have different needs and requirements when it comes to the apps 
 
 The QRSMS client itself are also open for more feature set as well as some quality of life improvements. At its current state, features such as being able to switch between sim cards on demand, being able to add an image from the device's storage for QR scanning, and better and user-friendly prompts that requires user's attention can be added among many others. Overall, QRSMS is a product that shows a different approach to end-to-end security using existing tools and technology.
 
+\begin{figure}[b]
+	\centering
+	\includegraphics[width=2.5in]{./images/seq_graph.png}
+	\caption{Graph of average SEQ response with standard deviation where the x-axis corresponds to the task in table \ref{tasks_table} and the y-axis is the difficulty rating}
+	\label{seq_graph}
+\end{figure}
+
+\begin{table}
+	\begin{tabular}{|l|>{\raggedright}p{2cm}|p{4cm}|}
+		\hline
+		No.     & Task                                      & Task Description                                                                                                                                       \\ \hline
+		1       & View conversation                         & Select a conversation to view in the inbox screen or create one by composing a new message.                                                            \\ \hline
+		2       & Generate
+		QR Code & Generate a QR code for a selected contact                                                                                                                                                          \\ \hline
+		3       & Save generated QR Code                    & After the QR Code generation task, save the QR code to the device’s gallery                                                                            \\ \hline
+		4       & Share generated QR Code                   & After the QR Code generation task, share the QR code through other platform using the share function                                                   \\ \hline
+		5       & Scan QR Code                              & Scan a valid QRSMS code received from a contact using your camera                                                                                      \\ \hline
+		6       & Send a regular SMS message                & Select a conversation in the inbox screen or compose a new message to a contact                                                                        \\ \hline
+		\rowcolor
+		7       & Send an encrypted SMS message             & After giving a contact your QR code and scanning their’s,  switch message type to Encrypted Message, and send an encrypted SMS message to that contact \\ \hline
+		8       & View generated QR Code                    & Find the “Manage Keys” screen and view the generated QR Code of a contact                                                                              \\ \hline
+		9       & Delete QR Code                            & Find the “Manage Keys” Screen and delete the generated QR Code of a contact                                                                            \\ \hline
+	\end{tabular}
+	\centering
+	\caption{Tasks users performed during SEQ}
+	\label{tasks_table}
+\end{table}
+
+
+\begin{table}
+	\begin{tabular}{| c | c |}
+		\hline
+		\multicolumn{1}{|l|}{Respondent number} & SUS Score      \\ \hline
+		1                                       & 55.00          \\ \hline
+		2                                       & 37.50          \\ \hline
+		3                                       & 75.00          \\ \hline
+		4                                       & 50.00          \\ \hline
+		5                                       & 50.00          \\ \hline
+		6                                       & 62.50          \\ \hline
+		7                                       & 80.00          \\ \hline
+		8                                       & 72.50          \\ \hline
+		9                                       & 70.00          \\ \hline
+		10                                      & 50.00          \\ \hline
+		11                                      & 55.00          \\ \hline
+		12                                      & 62.50          \\ \hline
+		13                                      & 32.50          \\ \hline
+		14                                      & 72.50          \\ \hline
+		Average                                 & \textbf{58.93} \\ \hline
+	\end{tabular}
+	\centering
+	\caption{Individual SUS Score for each respondents}
+	\label{sus_response}
+
+\end{table}
+
 % APPENDICES
-%\appendices
+%%\appendices
+\begin{appendices}
+
+	\section{Google Form Questionnaire}
+	\clearpage
+	\includepdf[pages=1-3]{./QRSMS_Usability Testing.pdf}
+
+	\onecolumn
+	\centering
+	\section{Usability Test Invitation Poster}
+	\begin{figure*}[h!]
+		\centering
+		\includegraphics[width=6in]{./images/Testers invitation poster.png}
+		\caption{Usability test invitation poster}
+	\end{figure*}
+
+	\clearpage
+	\section{UI Flows}
+	\begin{figure*}[h!]
+		\centering
+		\includegraphics[height=4in]{./images/Conversation Screen Flow.png}
+		\caption{Conversation screen UI Flow}
+	\end{figure*}
+
+	\begin{figure*}[h!]
+		\centering
+		\includegraphics[height=4in]{./images/Generate QR Flow.png}
+		\caption{Generate QR Screen UI Flow}
+	\end{figure*}
+
+	\begin{figure*}[h!]
+		\centering
+		\includegraphics[height=4in]{./images/Scan QR Flow.png}
+		\caption{Scan QR Screen UI Flow}
+	\end{figure*}
+
+	\begin{figure*}[h!]
+		\centering
+		\includegraphics[height=4in]{./images/Manage Keys Flow.png}
+		\caption{Manage keys UI Flow}
+	\end{figure*}
+
+\end{appendices}
+
+\twocolumn
+
+
 %Appendix one text goes here...
 %
 %\section{}
 %Appendix two (without title) text goes here...
 
 % ACKNOWLEDGMENT
-%\section*{Acknowledgment}
-%Many thanks to...
+\section*{Acknowledgment}
+The author would like to offer their deepest gratitude to Prof. Jaderick P. Pabico, adviser, for providing his time and guidance throughout the process. His insights and suggestions has been critical for the writing of this paper.
 
 % BIBLIOGRAPHY
 \bibliographystyle{./IEEE/IEEEtran}
@@ -629,7 +672,9 @@ The QRSMS client itself are also open for more feature set as well as some quali
 % \nocite{*}
 
 % BIOGRAPHY
-\begin{biography}[{\includegraphics[width=1in, height=1.5in]{./ramos.eps}}]{John Mel R. Ramos}
+\begin{biography}[{\includegraphics[width=1in, height=1.5in]{./ramos.eps}}]
+	{John Mel R. Ramos}
+
 	is a BS Computer Science student in the \UPLB. With interest in problem solving through programming, he wants to focus on a path towards software development. He is a member of the Alliance of Computer Science Students.
 \end{biography}
 
