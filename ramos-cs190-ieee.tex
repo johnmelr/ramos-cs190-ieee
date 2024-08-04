@@ -1,11 +1,17 @@
-\documentclass[journal]{./IEEE/IEEEtran}
+\documentclass{report}
 \usepackage{cite,graphicx}
+\usepackage[toc, page]{appendix}
 \usepackage{url}
 \usepackage{float}
 \usepackage{pdfpages}
 \usepackage{listings}
 \usepackage{multirow}
+\usepackage{multicol}
 \usepackage{array}
+\usepackage[a4paper, margin=1in]{geometry}
+\usepackage{titlesec}
+\usepackage{mathptmx}
+\usepackage{caption}
 
 \newcommand{\SPTITLE}{QRSMS: A SMS client with end-to-end encryption via Quick Response (QR) code}
 \newcommand{\ADVISEE}{John Mel R. Ramos}
@@ -22,12 +28,21 @@
 \author{\ADVISEE~and~\ADVISER%
 	\REMARK
 }
-\pubid{\copyright~2024~ICS \UPLB}
+%\pubid{\copyright~2024~ICS \UPLB}
+\date{}
+
+\renewcommand\thesection{\Roman{section}.}
+\renewcommand\thesubsection{\Alph{subsection}.}
+\renewcommand\thesubsubsection{\arabic{subsubsection}.}
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \begin{document}
 
 % TITLE
 \maketitle
+\tableofcontents
 
 % ABSTRACT
 \begin{abstract}
@@ -37,9 +52,9 @@
 \end{abstract}
 
 % INDEX TERMS
-\begin{keywords}
-	SMS, end-to-end encryption, QR Code, Android
-\end{keywords}
+%\begin{keywords}
+%	SMS, end-to-end encryption, QR Code, Android
+%\end{keywords}
 
 % INTRODUCTION
 \section{Introduction}
@@ -105,7 +120,7 @@ This paper proposed an SMS client that uses quick-response (QR) codes for
 key exchange.  This client encodes the phone number
 public key needed to generate a shared secret in a QR code. The generated
 code can be shared to the intended recipient through offline (in person)
-or other secure online\newpage\noindent platform that allows sending of images.
+or other secure online platform that allows sending of images.
 
 End-to-end security is achieved through the combined use of symmetric and
 asymmetric cryptography as well a key-agreement protocol. Advanced Encryption
@@ -199,13 +214,6 @@ aims to do the following:
 	\label{key_genagree}
 \end{figure*}
 
-\begin{figure*}
-	\centering
-	\includegraphics[width=6in]{images/encrypted_messaging.eps}
-	\caption{Overview of sending and decryption of messages in
-		QRSMS}
-	\label{encrypted}
-\end{figure*}
 
 \section{Materials and Methods}
 %% [1.] Design and implement a key-agreement protocol using QR code
@@ -292,6 +300,15 @@ is made available. AES algorithm with cipher block chaining (CBC) mode was used
 for symmetric cryptography using the derived secret key as the key for
 cryptographic operation shown in fig.~\ref{encrypted}.
 
+
+\begin{figure*}[!h]
+	\centering
+	\includegraphics[width=6in]{images/encrypted_messaging.eps}
+	\caption{Overview of sending and decryption of messages in
+		QRSMS}
+	\label{encrypted}
+\end{figure*}
+
 %% [3.] Conduct a usability study of the SMS client application.
 \subsection{Usability study for QRSMS}
 Throughout the duration of the development process, the features and interface
@@ -326,7 +343,7 @@ help them get started in the unmoderated test. Single Ease Question
 how easy or difficult they found each task to be.
 This is followed by a standard System Usability Scale (SUS) (fig.~\ref{sus_standard}) after completing the tasks to assess the system's perceived usability.
 
-\begin{figure}
+\begin{figure}[h]
 	\centering
 	\includegraphics[height=3.5in]{./images/Standard System Usability Scale.png}
 	\caption{Standard System Usability Scale~\cite{sus_scale}}
@@ -377,7 +394,7 @@ actions can slightly differ depending on the device's API level.
 
 \subsubsection*{API level 31 and above}
 If the device's API level is 31 or higher --- that is, starting from android
-version 12, an instance of the \texttt{KeyPairGenerator} class can be
+version 12, an instance of the \texttt{KeyPairGene\newline rator} class can be
 instantiated with the \texttt{getInstance()} method
 by adding the algorithm name \texttt{EC} as the first parameter
 and giving the string \texttt{AndroidKeyStore} in the provider field.
@@ -425,39 +442,11 @@ applications using android \texttt{Intents}.
 \subsubsection{QR Code Scanning}
 QR Code scanning capabilities are provided by android's CameraX with Google's MLKit analyzer and barcode scanning. The \texttt{CameraX} library enables the app to use the camera and attach its preview to a \texttt{PreviewView}. The CameraX
 package also provides built-in integration of Google's MLKit analyzer.
-By using the \texttt{setImageAnalysisAnalyzer()} method, the
+By using the \texttt{setImageAnalysi\newline sAnalyzer()} method, the
 \texttt{BarcodeScannerOptions} is passed to the \lstinline{MlKitAnalyzer}
 class so that the camera can detect QR Codes and decode its content. If the
 analyzer detects a valid QR Code, it will then attempt to perform
 a key exchange.
-
-\begin{figure}
-	\centering
-	\includegraphics[height=3in]{./images/QRSMS Inbox Screen.png}
-	\caption{QRSMS Inbox Screen}
-	\label{inbox_screen}
-\end{figure}
-
-\begin{figure}
-	\centering
-	\includegraphics[height=3in]{./images/QRSMS Select Contact Screen.png}
-	\caption{QRSMS New Conversation Screen}
-	\label{new_conversation}
-\end{figure}
-
-\begin{figure*}
-	\centering
-	\includegraphics[height=3.5in]{./images/send_encrypted.png}
-	\caption{Sending Encrypted Message}
-	\label{send_encrypted_message}
-\end{figure*}
-
-\begin{figure}
-	\centering
-	\includegraphics[height=3in]{./images/read_encrypted.png}
-	\caption{Reading Encrypted Message}
-	\label{read_encrypted_message}
-\end{figure}
 
 \subsubsection{Key-Agreement}
 Upon decoding a valid QR code for QRSMS, the application attempts to perform an ECDH key agreement. Since the phone number of the contact is also embedded inside the QR code, the system checks if there is an existing key pair stored in either the room database or the android keystore system depending on the device's supported API level. If there is, the system performs ECDH key agreement by taking the user's private key for the contact and their public key as parameters. In the same step, the contact's public key gets parsed back into a byte array from the base 64 string that it is from the decoding step.
@@ -468,6 +457,22 @@ The \texttt{KeyAgreement} class contains the function needed to generate a share
 While the generation and scanning of QR code is described in the previous sections, the client also provides users the ability to send and read regular and encrypted messages.
 Messages are retrieved from the default SMS application's content provider to ensure that the built-in SMS application remains operational even with QRSMS installed.
 To send a message, the user can either select a conversation from the inbox screen (fig.~\ref{inbox_screen}) which will take the user to the conversation screen that displays the thread of past messages, or select the create message icon in the lower right portion of the screen. Using the new conversation approach moves the user to a screen where they can select a contact or enter the phone number of the recipient (fig.~\ref{new_conversation}).
+
+\begin{multicols}{2}
+	
+	\centering
+	\includegraphics[height=3in]{./images/QRSMS Inbox Screen.png}
+	\captionof{figure}{QRSMS Inbox Screen}
+	\label{inbox_screen}
+
+	\columnbreak
+
+	\centering
+	\includegraphics[height=3in]{./images/QRSMS Select Contact Screen.png}
+	\captionof{figure}{QRSMS New Conversation Screen}
+	\label{new_conversation}
+
+\end{multicols}
 
 In the conversation screen, if the user has an existing secret key with the
 contact (e.g. they have previously performed a key-agreement), a select
@@ -484,6 +489,13 @@ an encrypted text, the application will automatically attempt to decrypt the mes
 (fig. \ref{read_encrypted_message}). If the same message is attempted
 to be viewed from the default SMS app, or if the corresponding key is not available (e.g the key is deleted, the user has not scanned the code for that specific contact), users will only see a string of text in base 64 (fig. \ref{default_sms_app}).
 
+\begin{figure}[h]
+	\centering
+	\includegraphics[height=3in]{./images/send_encrypted.png}
+	\caption{Sending Encrypted Message}
+	\label{send_encrypted_message}
+\end{figure}
+
 The app also provides a way to view and manage existing keys. The key
 management screen can be accessed by pressing the vertical ellipsis at the
 top right of the screen which brings out a menu where Manage Keys can be
@@ -493,19 +505,34 @@ after generating a QR Code and also a delete button. The screen also
 gives indication if end-to-end encryption is available for a given
 contact.
 
-\begin{figure}
-	\centering
+\begin{multicols}{3}
+\centering
+%\begin{figure}
+%	\centering
+	\includegraphics[height=3in]{./images/read_encrypted.png}
+	\captionof{figure}{Reading Encrypted Message}
+	\label{read_encrypted_message}
+%\end{figure}
+	\columnbreak
+%\begin{figure}
+%	\centering
 	\includegraphics[height=3in]{./images/default_sms_app.png}
-	\caption{Encrypted message as viewed in default sms app}
+	\captionof{figure}{Encrypted message as viewed in default sms app}
 	\label{default_sms_app}
-\end{figure}
+%\end{figure}
+	\columnbreak	
+\includegraphics[height=3in]{./images/QRSMS Manage Keys Screen.png}
+\captionof{figure}{Key Management Screen}
+\label{manage_keys_screen}
 
-\begin{figure}
-	\centering
-	\includegraphics[height=3in]{./images/QRSMS Manage Keys Screen.png}
-	\caption{Key Management Screen}
-	\label{manage_keys_screen}
-\end{figure}
+\end{multicols}
+
+%\begin{figure}[h]
+%	\centering
+%	\includegraphics[height=3in]{./images/QRSMS Manage Keys Screen.png}
+%	\captionof{figure}{Key Management Screen}
+%	\label{manage_keys_screen}
+%\end{figure}
 
 \subsubsection{Message Encryption}
 If the user choose to send an encrypted message, the text is encrypted
@@ -537,50 +564,15 @@ given message.
 \subsection{QRSMS Usability Testing}
 During the testing period, 14 respondents had tested and evaluated the application. Graph~\ref{seq_graph} and table~\ref{sus_response} shows the result of users' response for the SEQ and SUS respectively.
 
-\subsubsection{Single Ease Question}
-Users were given a total of 9 tasks as shown in table~\ref{tasks_table} where they are asked how they found its difficulty after the completion of each task. On average, users found each task with relative ease scoring an average of greater than 5 for most of the task except for tasks 6 and 7 with an average score of 4.43 and 4.50 respectively which are related to sending SMS message with a standard deviation of between 2.0 to 2.4. This could be due to a technical error in the application where in some cases, messages could not be sent. This assumption cannot be made certain though as there were no follow-up questions to ask users why they gave the task a certain score. Overall, users generally found the application fairly easy to use.
 
-\subsubsection{System Usability Scale}
-After testing out all core functionality of the system, users were asked to answer a standard System Usability Scale. SUS scores are calculated for each user where the scale value for odd numbered items were subtracted by 1, while the value for even numbered items were subtracted to 5. The difference is multiplied by 2.5 and is summed to get the overall usability of the system for a user~\cite{sus_scale}. In total, the average SUS score for QRSMS is 58.93. This suggests that users' overall experience with the system is not the worst but also not the best~\cite{Bangor_2009}.
-
-\section{Conclusion}
-This paper has shown a different approach to end-to-end encryption via the use of QR codes. The author was able to develop an android application that is capable of generate key pairs which can be encoded in a QR code, decode one from a contact to initiate an ECDH key agreement. The client is also capable of sending and reading regular and encrypted SMS based on the user's needs. Based on the result of the usability testing, it seems that despite being relatively easy to use for the average user scoring an average greated than 5 except for 2 tasks, not many may find it very appealing to use for their everyday use with a average SUS score of 58.93.
-
-\section{Recommendations and Future Works}
-Users generally have different needs and requirements when it comes to the apps that they use for their daily lives. For future researches, it might be beneficial if the system is implemented and tested in an environment where confidentiality is much more critical than the average user. The idea of using SMS and QR codes to enable end-to-end encryption might also be of use in other domains such as Internet-of-things for example. This paper has shown how such system can be utilized for a more generalized use case such as person-to-person communication. However, more specialized fields might benefit more from the advantage that this system brings. Future works based on this system might also want to consider a different approach when testing the application.
-
-The QRSMS client itself are also open for more feature set as well as some quality of life improvements. At its current state, features such as being able to switch between sim cards on demand, being able to add an image from the device's storage for QR scanning, and better and user-friendly prompts that requires user's attention can be added among many others. Overall, QRSMS is a product that shows a different approach to end-to-end security using existing tools and technology.
-
-\begin{figure}[b]
+\begin{figure}[h]
 	\centering
 	\includegraphics[width=2.5in]{./images/seq_graph.png}
 	\caption{Graph of average SEQ response with standard deviation where the x-axis corresponds to the task in table \ref{tasks_table} and the y-axis is the difficulty rating}
 	\label{seq_graph}
 \end{figure}
 
-\begin{table}
-	\begin{tabular}{|l|>{\raggedright}p{2cm}|p{4cm}|}
-		\hline
-		No.     & Task                                      & Task Description                                                                                                                                       \\ \hline
-		1       & View conversation                         & Select a conversation to view in the inbox screen or create one by composing a new message.                                                            \\ \hline
-		2       & Generate
-		QR Code & Generate a QR code for a selected contact                                                                                                                                                          \\ \hline
-		3       & Save generated QR Code                    & After the QR Code generation task, save the QR code to the device’s gallery                                                                            \\ \hline
-		4       & Share generated QR Code                   & After the QR Code generation task, share the QR code through other platform using the share function                                                   \\ \hline
-		5       & Scan QR Code                              & Scan a valid QRSMS code received from a contact using your camera                                                                                      \\ \hline
-		6       & Send a regular SMS message                & Select a conversation in the inbox screen or compose a new message to a contact                                                                        \\ \hline
-
-		7       & Send an encrypted SMS message             & After giving a contact your QR code and scanning their’s,  switch message type to Encrypted Message, and send an encrypted SMS message to that contact \\ \hline
-		8       & View generated QR Code                    & Find the “Manage Keys” screen and view the generated QR Code of a contact                                                                              \\ \hline
-		9       & Delete QR Code                            & Find the “Manage Keys” Screen and delete the generated QR Code of a contact                                                                            \\ \hline
-	\end{tabular}
-	\centering
-	\caption{Tasks users performed during SEQ}
-	\label{tasks_table}
-\end{table}
-
-
-\begin{table}
+\begin{table}[h]
 	\begin{tabular}{| c | c |}
 		\hline
 		\multicolumn{1}{|l|}{Respondent number} & SUS Score      \\ \hline
@@ -603,19 +595,58 @@ The QRSMS client itself are also open for more feature set as well as some quali
 	\centering
 	\caption{Individual SUS Score for each respondents}
 	\label{sus_response}
-
+	
 \end{table}
 
-% APPENDICES
-%%\appendices
-\begin{appendices}
+\subsubsection{Single Ease Question}
+Users were given a total of 9 tasks as shown in table~\ref{tasks_table} where they are asked how they found its difficulty after the completion of each task. On average, users found each task with relative ease scoring an average of greater than 5 for most of the task except for tasks 6 and 7 with an average score of 4.43 and 4.50 respectively which are related to sending SMS message with a standard deviation of between 2.0 to 2.4. This could be due to a technical error in the application where in some cases, messages could not be sent. This assumption cannot be made certain though as there were no follow-up questions to ask users why they gave the task a certain score. Overall, users generally found the application fairly easy to use.
 
-	\section{Google Form Questionnaire}
-	\clearpage
-	\includepdf[pages=1-3]{./QRSMS_Usability Testing.pdf}
-
-	\onecolumn
+\begin{table}[h]
+	\begin{tabular}{|l|>{\raggedright}p{4cm}|p{6cm}|}
+		\hline
+		No.     & Task                                      & Task Description                                                                                                                                       \\ \hline
+		1       & View conversation                         & Select a conversation to view in the inbox screen or create one by composing a new message.                                                            \\ \hline
+		2       & Generate
+		QR Code & Generate a QR code for a selected contact                                                                                                                                                          \\ \hline
+		3       & Save generated QR Code                    & After the QR Code generation task, save the QR code to the device’s gallery                                                                            \\ \hline
+		4       & Share generated QR Code                   & After the QR Code generation task, share the QR code through other platform using the share function                                                   \\ \hline
+		5       & Scan QR Code                              & Scan a valid QRSMS code received from a contact using your camera                                                                                      \\ \hline
+		6       & Send a regular SMS message                & Select a conversation in the inbox screen or compose a new message to a contact                                                                        \\ \hline
+		
+		7       & Send an encrypted SMS message             & After giving a contact your QR code and scanning their’s,  switch message type to Encrypted Message, and send an encrypted SMS message to that contact \\ \hline
+		8       & View generated QR Code                    & Find the “Manage Keys” screen and view the generated QR Code of a contact                                                                              \\ \hline
+		9       & Delete QR Code                            & Find the “Manage Keys” Screen and delete the generated QR Code of a contact                                                                            \\ \hline
+	\end{tabular}
 	\centering
+	\caption{Tasks users performed during SEQ}
+	\label{tasks_table}
+\end{table}
+
+\subsubsection{System Usability Scale}
+After testing out all core functionality of the system, users were asked to answer a standard System Usability Scale. SUS scores are calculated for each user where the scale value for odd numbered items were subtracted by 1, while the value for even numbered items were subtracted to 5. The difference is multiplied by 2.5 and is summed to get the overall usability of the system for a user~\cite{sus_scale}. In total, the average SUS score for QRSMS is 58.93. This suggests that users' overall experience with the system is not the worst but also not the best~\cite{Bangor_2009}.
+
+\section{Conclusion}
+This paper has shown a different approach to end-to-end encryption via the use of QR codes. The author was able to develop an android application that is capable of generate key pairs which can be encoded in a QR code, decode one from a contact to initiate an ECDH key agreement. The client is also capable of sending and reading regular and encrypted SMS based on the user's needs. Based on the result of the usability testing, it seems that despite being relatively easy to use for the average user scoring an average greated than 5 except for 2 tasks, not many may find it very appealing to use for their everyday use with a average SUS score of 58.93.
+
+\section{Recommendations and Future Works}
+Users generally have different needs and requirements when it comes to the apps that they use for their daily lives. For future researches, it might be beneficial if the system is implemented and tested in an environment where confidentiality is much more critical than the average user. The idea of using SMS and QR codes to enable end-to-end encryption might also be of use in other domains such as Internet-of-things for example. This paper has shown how such system can be utilized for a more generalized use case such as person-to-person communication. However, more specialized fields might benefit more from the advantage that this system brings. Future works based on this system might also want to consider a different approach when testing the application.
+
+The QRSMS client itself are also open for more feature set as well as some quality of life improvements. At its current state, features such as being able to switch between sim cards on demand, being able to add an image from the device's storage for QR scanning, and better and user-friendly prompts that requires user's attention can be added among many others. Overall, QRSMS is a product that shows a different approach to end-to-end security using existing tools and technology.
+
+
+
+
+
+
+% APPENDICES
+\appendices
+%\begin{appendices}
+
+	%\section{Google Form Questionnaire}
+	\includepdf[pages=1, scale=0.85, frame=true, pagecommand=\section{Google Form Questionnaire}]{./QRSMS_Usability Testing.pdf}
+	
+	\includepdf[pages=2-3, scale=0.85, frame=true]{./QRSMS_Usability Testing.pdf}
+
 	\section{Usability Test Invitation Poster}
 	\begin{figure*}[h]
 		\centering
@@ -626,34 +657,32 @@ The QRSMS client itself are also open for more feature set as well as some quali
 	\clearpage
 	\section{UI Flows}
 
-	\begin{figure*}[!h]
+	\begin{figure*}[h]
 		\centering
-		\includegraphics[height=4in]{./images/Conversation Screen Flow.png}
+		\includegraphics[height=3in]{./images/Conversation Screen Flow.png}
 		\caption{Conversation screen UI Flow}
 	\end{figure*}
 
-	\begin{figure*}[!h]
+	\begin{figure*}[h]
 		\centering
-		\includegraphics[height=4in]{./images/Generate QR Flow.png}
+		\includegraphics[height=3in]{./images/Generate QR Flow.png}
 		\caption{Generate QR Screen UI Flow}
 	\end{figure*}
-
-	\begin{figure*}[ht]
+	
+	\clearpage
+	\begin{figure*}[h]
 		\centering
-		\includegraphics[height=4in]{./images/Scan QR Flow.png}
+		\includegraphics[height=3in]{./images/Scan QR Flow.png}
 		\caption{Scan QR Screen UI Flow}
 	\end{figure*}
 
-	\begin{figure*}[ht]
+	\begin{figure*}[h]
 		\centering
-		\includegraphics[height=4in]{./images/Manage Keys Flow.png}
+		\includegraphics[height=3in]{./images/Manage Keys Flow.png}
 		\caption{Manage keys UI Flow}
 	\end{figure*}
 
-\end{appendices}
-
-\twocolumn
-
+%\end{appendices}
 
 %Appendix one text goes here...
 %
@@ -664,16 +693,17 @@ The QRSMS client itself are also open for more feature set as well as some quali
 \section*{Acknowledgment}
 The author would like to offer their deepest gratitude to Prof. Jaderick P. Pabico, adviser, for providing his time and guidance throughout the process. His insights and suggestions has been critical for the writing of this paper.
 
+\renewcommand{\bibname}{References}
 % BIBLIOGRAPHY
 \bibliographystyle{./IEEE/IEEEtran}
 \bibliography{./ramos-cs190-ieee}
 % \nocite{*}
 
 % BIOGRAPHY
-\begin{biography}[{\includegraphics[width=1in, height=1.5in]{./ramos.eps}}]
-	{John Mel R. Ramos}
+%\begin{biography}[{\includegraphics[width=1in, height=1.5in]{./ramos.eps}}]
+%	{John Mel R. Ramos}
 
-	is a BS Computer Science student in the \UPLB. With interest in problem solving through programming, he wants to focus on a path towards software development. He is a member of the Alliance of Computer Science Students.
-\end{biography}
+%	is a BS Computer Science student in the \UPLB. With interest in problem solving through programming, he wants to focus on a path towards software development. He is a member of the Alliance of Computer Science Students.
+%%\end{biography}
 
 \end{document}
